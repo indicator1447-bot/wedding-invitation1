@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<meta name="theme-color" content="#F7F4EB" />
+<meta name="theme-color" content="#F8F5EC" />
 <meta name="description" content="The Wedding of Midad & Arum — 16 Mei 2027" />
 <title>Midad & Arum • 16 Mei 2027</title>
 
@@ -14,15 +14,16 @@
 <style>
 :root {
   --cream: #F8F5EC;
-  --paper: rgba(255,255,255,.82);
+  --cream2: #EFE8DB;
+  --paper: rgba(255,255,255,0.88);
   --ink: #47372D;
   --muted: #846F63;
   --rose: #C98D8E;
   --rose2: #E6B6B1;
   --gold: #B79A69;
   --green: #7A8B6E;
-  --line: rgba(101,75,55,.12);
-  --shadow: 0 25px 60px rgba(88,66,50,.15);
+  --line: rgba(101,75,55,.14);
+  --shadow: 0 18px 45px rgba(88,66,50,.12);
   --ease: cubic-bezier(.22,.78,.22,1);
 }
 
@@ -38,54 +39,55 @@ img{max-width:100%;display:block}
 
 .serif{font-family:'Playfair Display',serif}
 .script{font-family:'Great Vibes',cursive;font-weight:400}
-.arabic{font-family:'Amiri',serif;line-height:2.2;font-size:1.5rem}
+.arabic{font-family:'Amiri',serif;line-height:2.2;font-size:1.45rem}
 .eyebrow{font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:var(--muted)}
 
-/* Background */
+/* PAGE BACKGROUND ATMOSPHERE */
 .page-shell {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
   background: 
-    radial-gradient(circle at 50% 15%, rgba(255,255,255,0.55) 0%, transparent 55%),
-    linear-gradient(180deg, #FAF7F0 0%, var(--cream) 30%, #F4EDE3 100%);
+    radial-gradient(circle at 50% 15%, rgba(255,255,255,0.6) 0%, transparent 60%),
+    linear-gradient(180deg, #FAF7F0 0%, var(--cream) 35%, #F3EBDD 100%);
+}
+
+/* ==================== 3D MARBLE ARCH WINDOW (STATIONARY) ==================== */
+.arch-fixed {
+  position: fixed;
+  z-index: 10;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(820px, 90vw);
+  height: 94vh;
+  pointer-events: none;
+}
+
+.arch-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 14px 28px rgba(88,66,50,0.12));
 }
 
 /* ==================== ANIMATED FLORAL SIDES ==================== */
+@keyframes floralSwayLeft{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(1.2deg)}}
+@keyframes floralSwayRight{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(-1.2deg)}}
+
 .floral-side {
   position: fixed;
   top: 0;
-  width: 40vw;
-  max-width: 440px;
+  width: min(38vw, 420px);
   height: 100vh;
-  z-index: -1;
+  z-index: 11;
   pointer-events: none;
-  opacity: 0.92;
+  opacity: 0.95;
 }
 
-.floral-side.left { left: 0; }
-.floral-side.right { right: 0; transform: scaleX(-1); }
+.floral-side.left { left: 0; animation: floralSwayLeft 7.5s ease-in-out infinite; }
+.floral-side.right { right: 0; animation: floralSwayRight 8.5s ease-in-out infinite .5s; }
 
-.floral-side svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 8px 25px rgba(88,66,50,0.08));
-}
-
-.flower-petal {
-  animation: gentleSway 7.5s ease-in-out infinite;
-  transform-origin: center;
-}
-.floral-side.right .flower-petal {
-  animation: gentleSway 8.5s ease-in-out infinite 1.2s;
-}
-
-@keyframes gentleSway {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-}
-
-/* ==================== ENHANCED FALLING PETALS ==================== */
+/* ==================== FALLING PETALS ==================== */
 .petal-container {
   position: fixed;
   inset: 0;
@@ -96,954 +98,289 @@ img{max-width:100%;display:block}
 
 .petal {
   position: absolute;
-  background: linear-gradient(135deg, #E8B4B0, #C98D8E);
-  border-radius: 50% 22% 50% 22%;
-  box-shadow: 0 3px 8px rgba(88,66,50,0.12);
-  animation: premiumPetalFall linear infinite;
-  opacity: 0.88;
+  background: linear-gradient(135deg, rgba(232,180,176,0.9), rgba(201,141,142,0.7));
+  border-radius: 50% 20% 50% 20%;
+  box-shadow: 0 2px 6px rgba(88,66,50,0.1);
+  animation: petalFall linear infinite;
 }
 
-.petal.pink { background: linear-gradient(135deg, #E8B4B0, #C98D8E); }
-.petal.rose { background: linear-gradient(135deg, #D4A5A5, #B87D7E); }
-.petal.cream { background: linear-gradient(135deg, #F5EDE3, #E8D9C8); }
-.petal.gold { background: linear-gradient(135deg, #D4C4A8, #B79A69); }
+@keyframes petalFall {
+  0% { top: -10%; opacity: 0; transform: translateX(0) rotate(0deg); }
+  15% { opacity: 0.9; }
+  85% { opacity: 0.9; }
+  100% { top: 105%; opacity: 0; transform: translateX(75px) rotate(420deg); }
+}
 
-/* ==================== COVER - SOFT LUXURY REVEAL ==================== */
+/* ==================== COVER OVERLAY ==================== */
 .cover {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: linear-gradient(180deg, rgba(250,247,239,.97), rgba(245,240,230,.98));
+  background: linear-gradient(180deg, rgba(250,247,239,.97), rgba(244,237,225,.98));
   display: grid;
   place-items: center;
-  transition: transform 1.8s var(--ease), opacity 1.6s ease;
+  transition: transform 1.3s var(--ease), opacity 1s ease;
+  will-change: transform;
 }
 
 .cover.is-open {
-  transform: translateY(-120%);
-  opacity: 0.01;
+  transform: translateY(-104%);
+  opacity: 0.05;
   pointer-events: none;
 }
 
 .cover-card {
   position: relative;
-  z-index: 10;
-  width: min(620px, 90vw);
-  padding: 62px 36px 56px;
+  z-index: 3;
+  width: min(580px, 88vw);
+  padding: 48px 26px 44px;
   text-align: center;
-  background: rgba(255,255,255,.86);
-  border: 1px solid rgba(255,255,255,.96);
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(255,255,255,.95);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 300px 300px 36px 36px;
-  transition: transform 1.7s var(--ease), opacity 1.5s ease;
+  border-radius: 280px 280px 28px 28px;
 }
 
-.cover.is-open .cover-card {
-  transform: translateY(-70px) scale(0.93);
-  opacity: 0.15;
+.cover-card:before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(183,154,105,.28);
+  border-radius: 260px 260px 20px 22px;
+  pointer-events: none;
 }
 
-.monogram {
-  font-size: .86rem;
-  letter-spacing: .65em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 26px;
-}
-
-.cover-title {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(3.5rem, 11vw, 7rem);
-  line-height: .82;
-  font-weight: 400;
-  margin: 0;
-  letter-spacing: -.065em;
-}
-
-.cover-title .amp {
-  font-family: 'Great Vibes', cursive;
-  color: var(--rose);
-  font-size: .76em;
-  margin: 0 .08em;
-}
-
-.cover-date {
-  margin: 22px 0 34px;
-  letter-spacing: .32em;
-  text-transform: uppercase;
-  font-size: .75rem;
-  color: var(--muted);
-}
-
-.guest-box {
-  margin: 0 auto 28px;
-  padding: 18px 26px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  max-width: 370px;
-}
-
-.guest-box span {
-  display: block;
-  font-size: .68rem;
-  color: var(--muted);
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.guest-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
-}
+.monogram { font-size: .82rem; letter-spacing: .55em; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; }
+.cover-title { font-family: 'Playfair Display', serif; font-size: clamp(3.1rem, 9.5vw, 6.2rem); line-height: .86; font-weight: 400; margin: 0; letter-spacing: -.05em; }
+.cover-title .amp { font-family: 'Great Vibes', cursive; color: var(--rose); font-size: .78em; margin: 0 .1em; }
+.cover-date { margin: 20px 0 28px; letter-spacing: .28em; text-transform: uppercase; font-size: .72rem; color: var(--muted); }
+.guest-box { margin: 0 auto 24px; padding: 14px 22px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); max-width: 360px; }
+.guest-box span { display: block; font-size: .65rem; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 6px; }
+.guest-name { font-family: 'Playfair Display', serif; font-size: 1.25rem; }
 
 .primary-btn {
   border: 0;
   background: linear-gradient(135deg, #BE8082, #D9A4A0);
   color: white;
-  padding: 17px 34px;
+  padding: 15px 30px;
   border-radius: 999px;
-  letter-spacing: .2em;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  font-size: .68rem;
+  font-size: .66rem;
   font-weight: 600;
-  box-shadow: 0 15px 35px rgba(190,128,130,.32);
+  box-shadow: 0 12px 28px rgba(190,128,130,.3);
   cursor: pointer;
-  transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+  transition: transform .3s ease, box-shadow .3s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.primary-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 20px 42px rgba(190,128,130,.4);
-}
+.primary-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(190,128,130,.38); }
 
-/* Main Content */
+/* ==================== MAIN CARDS ==================== */
 main { position: relative; z-index: 1; }
-section { padding: 92px 20px; position: relative; }
-.container { width: min(880px, 92vw); margin: 0 auto; }
-.narrow { width: min(700px, 92vw); }
+section { padding: 88px 20px; position: relative; }
+.container { width: min(860px, 90vw); margin: 0 auto; }
+.narrow { width: min(680px, 90vw); }
 
-.section-head {
-  text-align: center;
-  margin-bottom: 42px;
-}
-
-.section-head .script {
-  font-size: 2.45rem;
-  color: var(--rose);
-  margin-bottom: -6px;
-}
-
-.section-head h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(2.25rem, 7.5vw, 4.5rem);
-  font-weight: 400;
-  line-height: 1;
-  margin: 0;
-  letter-spacing: -.045em;
-}
-
-.section-head p {
-  max-width: 560px;
-  margin: 16px auto 0;
-  color: var(--muted);
-  line-height: 1.8;
-  font-size: .93rem;
-}
+.section-head { text-align: center; margin-bottom: 38px; }
+.section-head .script { font-size: 2.35rem; color: var(--rose); margin-bottom: -4px; }
+.section-head h2 { font-family: 'Playfair Display', serif; font-size: clamp(2.1rem, 7vw, 4.2rem); font-weight: 400; line-height: 1; margin: 0; letter-spacing: -.04em; }
+.section-head p { max-width: 540px; margin: 14px auto 0; color: var(--muted); line-height: 1.75; font-size: .9rem; }
 
 .glass {
   background: var(--paper);
-  border: 1px solid rgba(255,255,255,.92);
+  border: 1px solid rgba(255,255,255,.95);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
   border-radius: 26px;
-  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
 }
 
-.glass:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 32px 80px rgba(88,66,50,.18);
-}
+.glass:hover { transform: translateY(-4px); box-shadow: 0 26px 65px rgba(88,66,50,.16); }
 
 /* Quote */
-.quote-card {
-  padding: 54px 38px;
-  text-align: center;
-}
-
-.quote-card blockquote {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(1.28rem, 4.1vw, 2.05rem);
-  line-height: 1.55;
-  margin: 24px auto 18px;
-  max-width: 680px;
-  font-style: italic;
-}
-
-.quote-card small {
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-size: .66rem;
-}
+.quote-card { padding: 48px 32px; text-align: center; }
+.quote-card blockquote { font-family: 'Playfair Display', serif; font-size: clamp(1.22rem, 3.8vw, 1.9rem); line-height: 1.6; margin: 16px auto 14px; max-width: 660px; font-style: italic; }
+.quote-card small { letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-size: .64rem; }
 
 /* Couple */
-.couple-grid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 34px;
-  align-items: center;
-}
-
-.couple-card {
-  padding: 38px 28px;
-  text-align: center;
-  min-height: 530px;
-}
-
+.couple-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 28px; align-items: center; }
+.couple-card { padding: 34px 22px; text-align: center; }
 .portrait {
-  width: 222px;
-  height: 272px;
-  margin: 0 auto 26px;
-  border-radius: 162px 162px 32px 32px;
-  border: 9px solid rgba(255,255,255,.92);
-  box-shadow: 0 22px 55px rgba(92,71,56,.18);
+  width: 200px;
+  height: 250px;
+  margin: 0 auto 22px;
+  border-radius: 140px 140px 26px 26px;
+  border: 7px solid rgba(255,255,255,.9);
+  box-shadow: 0 16px 40px rgba(92,71,56,.14);
   overflow: hidden;
-  background: #F5EDE3;
+  background: #EFE8DB;
+  display: grid;
+  place-items: center;
 }
-
-.portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  transition: transform 1.3s var(--ease);
-}
-
-.couple-card:hover .portrait img {
-  transform: scale(1.09);
-}
-
-.couple-card h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.92rem;
-  font-weight: 400;
-  margin: 0 0 6px;
-}
-
-.couple-title-sub {
-  font-size: .8rem;
-  color: var(--gold);
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.couple-role {
-  font-family: 'Great Vibes', cursive;
-  color: var(--rose);
-  font-size: 1.88rem;
-}
-
-.parents-info {
-  color: var(--muted);
-  font-size: .85rem;
-  line-height: 1.65;
-  max-width: 305px;
-  margin: 15px auto;
-  border-top: 1px solid var(--line);
-  padding-top: 14px;
-}
-
-.instagram {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 10px;
-  padding: 10px 19px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  font-size: .74rem;
-  color: var(--muted);
-  transition: .3s ease;
-}
-
-.instagram:hover {
-  background: rgba(201,141,142,.1);
-  color: var(--rose);
-}
-
-.amp-divider {
-  font-family: 'Great Vibes', cursive;
-  font-size: 4.6rem;
-  color: var(--rose);
-  opacity: .85;
-  line-height: 1;
-}
+.portrait img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.couple-card h3 { font-family: 'Playfair Display', serif; font-size: 1.85rem; font-weight: 400; margin: 0 0 4px; }
+.couple-title-sub { font-size: .78rem; color: var(--gold); margin-bottom: 8px; font-weight: 500; }
+.couple-role { font-family: 'Great Vibes', cursive; color: var(--rose); font-size: 1.75rem; }
+.parents-info { color: var(--muted); font-size: .82rem; line-height: 1.6; max-width: 290px; margin: 12px auto; border-top: 1px solid var(--line); padding-top: 12px; }
+.instagram { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); font-size: .72rem; color: var(--muted); }
+.amp-divider { font-family: 'Great Vibes', cursive; font-size: 4rem; color: var(--rose); opacity: .85; }
 
 /* Countdown */
-.countdown-wrap { padding: 48px 30px; text-align: center; }
-
-.countdown {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.time-box {
-  text-align: center;
-  padding: 23px 10px;
-  border-radius: 20px;
-  background: rgba(255,255,255,.62);
-  border: 1px solid rgba(255,255,255,.9);
-}
-
-.time-box strong {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
-  font-size: clamp(2.05rem, 6.2vw, 3.5rem);
-  display: block;
-  color: var(--rose);
-}
-
-.time-box span {
-  font-size: .64rem;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
+.countdown-wrap { padding: 42px 24px; text-align: center; }
+.countdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.time-box { text-align: center; padding: 20px 6px; border-radius: 18px; background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.9); }
+.time-box strong { font-family: 'Playfair Display', serif; font-weight: 400; font-size: clamp(1.9rem, 5.5vw, 3.2rem); display: block; color: var(--rose); }
+.time-box span { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
 
 /* Events */
-.events {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-
-.event-card {
-  padding: 42px 32px;
-  position: relative;
-  text-align: center;
-}
-
-.event-no {
-  position: absolute;
-  right: 24px;
-  top: 16px;
-  font-family: 'Playfair Display', serif;
-  font-size: 5.4rem;
-  color: rgba(183,154,105,.1);
-  pointer-events: none;
-}
-
-.event-card h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.05rem;
-  font-weight: 400;
-  margin: 12px 0 18px;
-}
-
-.event-detail {
-  display: grid;
-  gap: 11px;
-  color: var(--muted);
-  font-size: .89rem;
-  line-height: 1.65;
-}
+.events { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.event-card { padding: 36px 26px; position: relative; text-align: center; }
+.event-no { position: absolute; right: 20px; top: 12px; font-family: 'Playfair Display', serif; font-size: 4.8rem; color: rgba(183,154,105,.1); pointer-events: none; }
+.event-card h3 { font-family: 'Playfair Display', serif; font-size: 1.95rem; font-weight: 400; margin: 8px 0 14px; }
+.event-detail { display: grid; gap: 9px; color: var(--muted); font-size: .86rem; line-height: 1.6; }
 
 .outline-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 26px;
+  gap: 6px;
+  margin-top: 22px;
   border: 1px solid rgba(71,55,45,.2);
-  background: rgba(255,255,255,.52);
-  padding: 13px 26px;
+  background: rgba(255,255,255,.5);
+  padding: 11px 22px;
   border-radius: 999px;
-  font-size: .7rem;
+  font-size: .68rem;
   text-transform: uppercase;
-  letter-spacing: .16em;
+  letter-spacing: .14em;
   cursor: pointer;
   transition: .3s ease;
 }
-
-.outline-btn:hover {
-  background: var(--ink);
-  color: white;
-}
-
-/* Protokol */
-.protokol-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
-  gap: 24px;
-}
-
-.protokol-card {
-  padding: 32px;
-}
-
-.protokol-card h4 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  margin: 0 0 16px;
-}
-
-.protokol-card ul {
-  margin: 0;
-  padding-left: 20px;
-  color: var(--muted);
-  font-size: .94rem;
-  line-height: 1.8;
-}
+.outline-btn:hover { background: var(--ink); color: white; }
 
 /* Gallery */
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.gallery-item {
-  aspect-ratio: 3/4;
-  border-radius: 20px;
-  overflow: hidden;
-  background: #F5EDE3;
-  border: 5px solid rgba(255,255,255,.92);
-  box-shadow: 0 12px 32px rgba(88,66,50,.1);
-  cursor: pointer;
-}
-
-.gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 1.15s var(--ease);
-}
-
-.gallery-item:hover img {
-  transform: scale(1.12);
-}
+.gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.gallery-item { aspect-ratio: 3/4; border-radius: 18px; overflow: hidden; background: #F5EDE3; border: 4px solid rgba(255,255,255,.9); box-shadow: 0 10px 25px rgba(88,66,50,.08); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
 
 /* Timeline */
-.timeline { position: relative; margin-top: 22px; }
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 20px;
-  bottom: 20px;
-  width: 1.5px;
-  background: linear-gradient(var(--rose2), rgba(183,154,105,.25));
-}
-
-.story {
-  display: grid;
-  grid-template-columns: 1fr 62px 1fr;
-  gap: 22px;
-  align-items: center;
-  margin: 34px 0;
-}
-
+.timeline { position: relative; margin-top: 18px; }
+.timeline::before { content: ''; position: absolute; left: 50%; top: 16px; bottom: 16px; width: 1px; background: linear-gradient(var(--rose2), rgba(183,154,105,.25)); }
+.story { display: grid; grid-template-columns: 1fr 54px 1fr; gap: 18px; align-items: center; margin: 28px 0; }
 .story:nth-child(even) .story-card { grid-column: 3; }
 .story:nth-child(even) .dot { grid-column: 2; grid-row: 1; }
-
-.story-card { grid-column: 1; padding: 32px; }
-
-.story-year {
-  font-family: 'Great Vibes', cursive;
-  color: var(--rose);
-  font-size: 1.82rem;
-}
-
-.story-card h3 {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
-  font-size: 1.52rem;
-  margin: 0 0 10px;
-}
-
-.story-card p {
-  margin: 0;
-  color: var(--muted);
-  font-size: .89rem;
-  line-height: 1.8;
-}
-
-.dot {
-  grid-column: 2;
-  width: 21px;
-  height: 21px;
-  border-radius: 50%;
-  background: #fff;
-  border: 6px solid var(--rose2);
-  box-shadow: 0 0 0 8px rgba(201,141,142,.12);
-  justify-self: center;
-  z-index: 2;
-}
+.story-card { grid-column: 1; padding: 28px; }
+.story-year { font-family: 'Great Vibes', cursive; color: var(--rose); font-size: 1.75rem; }
+.story-card h3 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 1.45rem; margin: 0 0 8px; }
+.story-card p { margin: 0; color: var(--muted); font-size:.85rem; line-height: 1.75; }
+.dot { grid-column: 2; width: 19px; height: 19px; border-radius: 50%; background: #fff; border: 5px solid var(--rose2); box-shadow: 0 0 0 6px rgba(201,141,142,.12); justify-self: center; z-index: 2; }
 
 /* Gift & RSVP */
-.gift-card { padding: 52px 38px; text-align: center; }
-
-.gift-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  margin: 0 auto 20px;
-  background: rgba(201,141,142,.12);
-  font-size: 2.1rem;
-}
-
-.rsvp-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 24px;
-}
-
-.wishes-panel, .form-panel { padding: 34px; }
-
-.badge-wrap { display: flex; gap: 12px; margin-bottom: 24px; }
-
-.badge-box {
-  flex: 1;
-  padding: 15px;
-  border-radius: 16px;
-  text-align: center;
-  color: white;
-  font-weight: 600;
-  font-size: .88rem;
-}
-
+.gift-card { padding: 44px 30px; text-align: center; }
+.gift-icon { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 16px; background: rgba(201,141,142,.12); font-size: 1.8rem; }
+.rsvp-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 20px; }
+.wishes-panel, .form-panel { padding: 30px; }
+.badge-wrap { display: flex; gap: 10px; margin-bottom: 20px; }
+.badge-box { flex: 1; padding: 12px; border-radius: 14px; text-align: center; color: white; font-weight: 600; font-size: .84rem; }
 .badge-box.hadir { background: #7A8B6E; }
 .badge-box.absen { background: #C98D8E; }
+.wishes-list { display: grid; gap: 12px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+.wish { padding: 16px; border-radius: 16px; background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.8); }
+.wish strong { font-family: 'Playfair Display', serif; font-weight: 500; display: block; margin-bottom: 4px; }
+.wish p { font-size: .8rem; color: var(--muted); line-height: 1.6; margin: 0; }
 
-.wishes-list {
-  display: grid;
-  gap: 14px;
-  max-height: 410px;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.wish {
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.52);
-  border: 1px solid rgba(255,255,255,.82);
-}
-
-.wish strong {
-  font-family: 'Playfair Display', serif;
-  font-weight: 500;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.wish p {
-  font-size: .83rem;
-  color: var(--muted);
-  line-height: 1.65;
-  margin: 0;
-}
-
-form { display: grid; gap: 15px; }
-
-input, select, textarea {
-  width: 100%;
-  border: 1px solid rgba(71,55,45,.14);
-  background: rgba(255,255,255,.72);
-  border-radius: 16px;
-  padding: 16px 18px;
-  color: var(--ink);
-  outline: none;
-  transition: .3s ease;
-}
-
-textarea { min-height: 122px; resize: vertical; }
-
-input:focus, select:focus, textarea:focus {
-  border-color: rgba(201,141,142,.6);
-  box-shadow: 0 0 0 4px rgba(201,141,142,.1);
-}
+form { display: grid; gap: 12px; }
+input, select, textarea { width: 100%; border: 1px solid rgba(71,55,45,.14); background: rgba(255,255,255,.65); border-radius: 15px; padding: 14px 16px; color: var(--ink); outline: none; }
+textarea { min-height: 110px; resize: vertical; }
 
 /* Closing */
-.closing {
-  text-align: center;
-  padding-bottom: 155px;
-}
+.closing { text-align: center; padding-bottom: 140px; }
+.closing .script { font-size: 3.4rem; color: var(--rose); }
+.closing h2 { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 9vw, 5.6rem); font-weight: 400; letter-spacing: -.05em; margin: 8px 0 12px; }
+.closing-photo { width: min(320px, 80vw); aspect-ratio: 3/4; margin: 24px auto 30px; border-radius: 180px 180px 24px 24px; border: 8px solid rgba(255,255,255,.9); box-shadow: var(--shadow); overflow: hidden; background: #F5EDE3; }
+.closing-photo img { width: 100%; height: 100%; object-fit: cover; }
 
-.closing .script {
-  font-size: 3.6rem;
-  color: var(--rose);
-}
-
-.closing h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(3.3rem, 9.5vw, 6.1rem);
-  font-weight: 400;
-  letter-spacing: -.055em;
-  margin: 12px 0 16px;
-}
-
-.closing-photo {
-  width: min(345px, 82vw);
-  aspect-ratio: 3/4;
-  margin: 30px auto 36px;
-  border-radius: 200px 200px 30px 30px;
-  border: 9px solid rgba(255,255,255,.92);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  background: #F5EDE3;
-}
-
-.closing-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Music */
-.music-wrap {
-  position: fixed;
-  z-index: 900;
-  right: 20px;
-  bottom: max(20px, env(safe-area-inset-bottom));
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.music-label {
-  background: rgba(255,255,255,.86);
-  border: 1px solid rgba(255,255,255,.9);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 10px 30px rgba(83,61,45,.12);
-  padding: 10px 15px;
-  border-radius: 16px;
-  font-size: .64rem;
-  line-height: 1.4;
-  color: var(--muted);
-}
-
-.music-label b {
-  display: block;
-  color: var(--ink);
-  font-weight: 500;
-}
-
-.music-btn {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.9);
-  background: linear-gradient(145deg, #C88688, #E3B4AD);
-  color: white;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 16px 38px rgba(190,128,130,.35);
-  cursor: pointer;
-  font-size: 1.25rem;
-  transition: transform .3s ease;
-}
-
+/* Music Player */
+.music-wrap { position: fixed; z-index: 900; right: 18px; bottom: max(18px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 10px; }
+.music-label { background: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.9); padding: 8px 12px; border-radius: 14px; font-size: .6rem; color: var(--muted); }
+.music-label b { display: block; color: var(--ink); font-weight: 500; }
+.music-btn { width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,.9); background: linear-gradient(145deg, #C88688, #E3B4AD); color: white; display: grid; place-items: center; box-shadow: 0 14px 32px rgba(190,128,130,.35); cursor: pointer; font-size: 1.15rem; }
 .music-btn.playing { animation: spin 8s linear infinite; }
-
 @keyframes spin { to { transform: rotate(360deg); } }
+.yt-stage { position: fixed; width: 1px; height: 1px; left: -9999px; opacity: 0.001; pointer-events: none; }
 
-.yt-stage {
-  position: fixed;
-  width: 240px;
-  height: 200px;
-  right: -9999px;
-  bottom: -9999px;
-  opacity: .001;
-  pointer-events: none;
-  overflow: hidden;
-}
+/* Modal & Toast */
+.modal { position: fixed; inset: 0; z-index: 1100; background: rgba(51,39,31,.42); display: grid; place-items: center; padding: 20px; opacity: 0; visibility: hidden; transition: .3s ease; }
+.modal.open { opacity: 1; visibility: visible; }
+.modal-card { width: min(460px, 90vw); padding: 36px; position: relative; text-align: center; }
+.close { position: absolute; right: 16px; top: 14px; border: 0; background: transparent; font-size: 1.5rem; color: var(--muted); cursor: pointer; }
+.bank { margin-top: 18px; padding: 18px; border-radius: 16px; background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.85); }
+.bank small { display: block; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; font-size: .6rem; }
+.bank strong { font-family: 'Playfair Display', serif; display: block; font-size: 1.35rem; margin: 6px 0; }
 
-/* Modals */
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1100;
-  background: rgba(51,39,31,.48);
-  display: grid;
-  place-items: center;
-  padding: 22px;
-  opacity: 0;
-  visibility: hidden;
-  transition: .35s ease;
-  backdrop-filter: blur(10px);
-}
+.toast { position: fixed; left: 50%; bottom: 84px; transform: translate(-50%, 20px); z-index: 1200; background: #47372D; color: white; padding: 12px 20px; border-radius: 999px; font-size: .72rem; opacity: 0; pointer-events: none; transition: .3s ease; max-width: 86vw; text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-.modal.open {
-  opacity: 1;
-  visibility: visible;
-}
-
-.modal-card {
-  width: min(480px, 92vw);
-  padding: 40px;
-  position: relative;
-  transform: translateY(24px) scale(.98);
-  transition: .4s var(--ease);
-}
-
-.modal.open .modal-card { transform: none; }
-
-.close {
-  position: absolute;
-  right: 18px;
-  top: 16px;
-  border: 0;
-  background: transparent;
-  font-size: 1.6rem;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.bank {
-  margin-top: 22px;
-  padding: 22px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.6);
-  border: 1px solid rgba(255,255,255,.85);
-  text-align: center;
-}
-
-.bank small {
-  display: block;
-  color: var(--muted);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  font-size: .62rem;
-}
-
-.bank strong {
-  font-family: 'Playfair Display', serif;
-  display: block;
-  font-size: 1.42rem;
-  margin: 8px 0;
-}
-
-/* Lightbox */
-.lightbox-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1300;
-  background: rgba(28,24,20,.94);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.lightbox-modal.active { display: flex; }
-
-.lightbox-content {
-  position: relative;
-  max-width: 94vw;
-  max-height: 92vh;
-}
-
-.lightbox-content img {
-  max-width: 100%;
-  max-height: 84vh;
-  border-radius: 14px;
-  box-shadow: 0 30px 80px rgba(0,0,0,.7);
-}
-
-.lightbox-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255,255,255,.15);
-  color: white;
-  border: none;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  font-size: 1.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: .2s;
-}
-
-.lightbox-nav:hover { background: rgba(255,255,255,.3); }
-
-.lightbox-nav.prev { left: -68px; }
-.lightbox-nav.next { right: -68px; }
-
-.lightbox-close {
-  position: absolute;
-  top: -55px;
-  right: 0;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 2.4rem;
-  cursor: pointer;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 92px;
-  transform: translate(-50%, 20px);
-  z-index: 1200;
-  background: #47372D;
-  color: white;
-  padding: 13px 22px;
-  border-radius: 999px;
-  font-size: .74rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: .35s ease;
-  max-width: 86vw;
-  text-align: center;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
-/* Scroll Reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(55px) scale(.95);
-  transition: opacity 1s var(--ease), transform 1s var(--ease);
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
+/* Scroll Reveal Animation */
+.reveal { opacity: 0; transform: translateY(45px) scale(.95); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+.reveal.visible { opacity: 1; transform: translateY(0) scale(1); }
 
 @media (max-width: 780px) {
-  section { padding: 74px 18px; }
-  .floral-side { width: 46vw; }
-  .couple-grid, .events, .rsvp-grid { grid-template-columns: 1fr; gap: 22px; }
-  .amp-divider { transform: rotate(-10deg); font-size: 3.3rem; }
-  .couple-card { min-height: auto; }
+  section { padding: 68px 16px; }
+  .floral-side { width: 44vw; }
+  .couple-grid, .events, .rsvp-grid { grid-template-columns: 1fr; gap: 20px; }
+  .amp-divider { transform: rotate(-8deg); font-size: 3.2rem; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-  .timeline::before { left: 26px; }
-  .story { grid-template-columns: 50px 1fr; gap: 16px; }
+  .timeline::before { left: 22px; }
+  .story { grid-template-columns: 44px 1fr; gap: 14px; }
   .story .dot, .story:nth-child(even) .dot { grid-column: 1; grid-row: 1; }
   .story .story-card, .story:nth-child(even) .story-card { grid-column: 2; grid-row: 1; }
-  .countdown { gap: 9px; }
-  .time-box { padding: 18px 6px; }
+  .countdown { gap: 8px; }
+  .time-box { padding: 16px 4px; }
   .music-label { display: none; }
-  .lightbox-nav { display: none; }
 }
 </style>
 </head>
 <body class="locked">
 
-<!-- ==================== ENHANCED FALLING PETALS ==================== -->
 <div class="petal-container" id="petalContainer"></div>
 
 <div class="page-shell">
 
-  <!-- ==================== ANIMATED FLORAL SIDES ==================== -->
+  <div class="arch-fixed" aria-hidden="true">
+    <svg class="arch-svg" viewBox="0 0 800 1000" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="marbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FAF6F0"/>
+          <stop offset="50%" stop-color="#EFE7DA"/>
+          <stop offset="100%" stop-color="#F7F1E5"/>
+        </linearGradient>
+      </defs>
+      <path d="M 60 1000 L 60 420 A 340 340 0 0 1 740 420 L 740 1000 L 680 1000 L 680 420 A 280 280 0 0 0 120 420 L 120 1000 Z" fill="url(#marbleGrad)"/>
+      <path d="M 370 70 L 430 70 L 445 130 L 355 130 Z" fill="url(#marbleGrad)" stroke="#B79A69" stroke-opacity="0.4" stroke-width="2"/>
+    </svg>
+  </div>
+
   <div class="floral-side left" aria-hidden="true">
-    <svg viewBox="0 0 440 1000" width="100%" height="100%" preserveAspectRatio="xMinYMid meet">
-      <path d="M45 80 Q 130 260 60 510 T 125 880" stroke="#6B7F5E" stroke-width="3.5" fill="none" opacity="0.6"/>
-      
-      <g class="flower-petal">
-        <ellipse cx="105" cy="195" rx="22" ry="13" fill="#E8B4B0" transform="rotate(-25 105 195)"/>
-        <ellipse cx="105" cy="195" rx="22" ry="13" fill="#E8B4B0" transform="rotate(25 105 195)"/>
-        <ellipse cx="105" cy="195" rx="22" ry="13" fill="#E8B4B0" transform="rotate(90 105 195)"/>
-        <ellipse cx="105" cy="195" rx="19" ry="11" fill="#D48A8B" transform="rotate(-55 105 195)"/>
-        <ellipse cx="105" cy="195" rx="19" ry="11" fill="#D48A8B" transform="rotate(55 105 195)"/>
-        <circle cx="105" cy="195" r="7" fill="#C97A7B"/>
-      </g>
-
-      <g class="flower-petal">
-        <ellipse cx="68" cy="365" rx="24" ry="14" fill="#F0C2BD" transform="rotate(-20 68 365)"/>
-        <ellipse cx="68" cy="365" rx="24" ry="14" fill="#F0C2BD" transform="rotate(20 68 365)"/>
-        <ellipse cx="68" cy="365" rx="24" ry="14" fill="#F0C2BD" transform="rotate(90 68 365)"/>
-        <ellipse cx="68" cy="365" rx="20" ry="12" fill="#E29B97" transform="rotate(-55 68 365)"/>
-        <ellipse cx="68" cy="365" rx="20" ry="12" fill="#E29B97" transform="rotate(55 68 365)"/>
-        <circle cx="68" cy="365" r="8" fill="#D48A8B"/>
-      </g>
-
-      <g class="flower-petal">
-        <ellipse cx="118" cy="555" rx="21" ry="12" fill="#DDB27C" transform="rotate(-30 118 555)"/>
-        <ellipse cx="118" cy="555" rx="21" ry="12" fill="#DDB27C" transform="rotate(30 118 555)"/>
-        <ellipse cx="118" cy="555" rx="21" ry="12" fill="#DDB27C" transform="rotate(90 118 555)"/>
-        <ellipse cx="118" cy="555" rx="17" ry="10" fill="#C9A16B" transform="rotate(-60 118 555)"/>
-        <ellipse cx="118" cy="555" rx="17" ry="10" fill="#C9A16B" transform="rotate(60 118 555)"/>
-        <circle cx="118" cy="555" r="6.5" fill="#B88F5A"/>
-      </g>
-
-      <g class="flower-petal">
-        <ellipse cx="82" cy="765" rx="23" ry="13.5" fill="#E8B4B0" transform="rotate(-18 82 765)"/>
-        <ellipse cx="82" cy="765" rx="23" ry="13.5" fill="#E8B4B0" transform="rotate(18 82 765)"/>
-        <ellipse cx="82" cy="765" rx="23" ry="13.5" fill="#E8B4B0" transform="rotate(90 82 765)"/>
-        <ellipse cx="82" cy="765" rx="19" ry="11" fill="#D48A8B" transform="rotate(-52 82 765)"/>
-        <ellipse cx="82" cy="765" rx="19" ry="11" fill="#D48A8B" transform="rotate(52 82 765)"/>
-        <circle cx="82" cy="765" r="7.5" fill="#C97A7B"/>
-      </g>
+    <svg viewBox="0 0 300 800" width="100%" height="100%" preserveAspectRatio="xMinYMid meet">
+      <path d="M10 80 Q140 220 40 450 T120 720" stroke="#7A8B6E" stroke-width="3" fill="none" opacity="0.6"/>
+      <circle cx="110" cy="200" r="40" fill="#E8B4B0" opacity="0.88"/>
+      <circle cx="102" cy="192" r="30" fill="#DF9995" opacity="0.9"/>
+      <circle cx="48" cy="340" r="46" fill="#F0C2BD" opacity="0.85"/>
+      <circle cx="120" cy="540" r="36" fill="#DDB27C" opacity="0.82"/>
     </svg>
   </div>
 
   <div class="floral-side right" aria-hidden="true">
-    <svg viewBox="0 0 440 1000" width="100%" height="100%" preserveAspectRatio="xMaxYMid meet">
-      <path d="M395 80 Q 310 260 380 510 T 315 880" stroke="#6B7F5E" stroke-width="3.5" fill="none" opacity="0.6"/>
-      
-      <g class="flower-petal">
-        <ellipse cx="335" cy="195" rx="22" ry="13" fill="#E8B4B0" transform="rotate(-25 335 195)"/>
-        <ellipse cx="335" cy="195" rx="22" ry="13" fill="#E8B4B0" transform="rotate(25 335 195)"/>
-        <ellipse cx="335" cy="195" rx="22" ry="13" fill="#E8B4B0" transform="rotate(90 335 195)"/>
-        <ellipse cx="335" cy="195" rx="19" ry="11" fill="#D48A8B" transform="rotate(-55 335 195)"/>
-        <ellipse cx="335" cy="195" rx="19" ry="11" fill="#D48A8B" transform="rotate(55 335 195)"/>
-        <circle cx="335" cy="195" r="7" fill="#C97A7B"/>
-      </g>
-
-      <g class="flower-petal">
-        <ellipse cx="372" cy="365" rx="24" ry="14" fill="#F0C2BD" transform="rotate(-20 372 365)"/>
-        <ellipse cx="372" cy="365" rx="24" ry="14" fill="#F0C2BD" transform="rotate(20 372 365)"/>
-        <ellipse cx="372" cy="365" rx="24" ry="14" fill="#F0C2BD" transform="rotate(90 372 365)"/>
-        <ellipse cx="372" cy="365" rx="20" ry="12" fill="#E29B97" transform="rotate(-55 372 365)"/>
-        <ellipse cx="372" cy="365" rx="20" ry="12" fill="#E29B97" transform="rotate(55 372 365)"/>
-        <circle cx="372" cy="365" r="8" fill="#D48A8B"/>
-      </g>
-
-      <g class="flower-petal">
-        <ellipse cx="322" cy="555" rx="21" ry="12" fill="#DDB27C" transform="rotate(-30 322 555)"/>
-        <ellipse cx="322" cy="555" rx="21" ry="12" fill="#DDB27C" transform="rotate(30 322 555)"/>
-        <ellipse cx="322" cy="555" rx="21" ry="12" fill="#DDB27C" transform="rotate(90 322 555)"/>
-        <ellipse cx="322" cy="555" rx="17" ry="10" fill="#C9A16B" transform="rotate(-60 322 555)"/>
-        <ellipse cx="322" cy="555" rx="17" ry="10" fill="#C9A16B" transform="rotate(60 322 555)"/>
-        <circle cx="322" cy="555" r="6.5" fill="#B88F5A"/>
-      </g>
-
-      <g class="flower-petal">
-        <ellipse cx="358" cy="765" rx="23" ry="13.5" fill="#E8B4B0" transform="rotate(-18 358 765)"/>
-        <ellipse cx="358" cy="765" rx="23" ry="13.5" fill="#E8B4B0" transform="rotate(18 358 765)"/>
-        <ellipse cx="358" cy="765" rx="23" ry="13.5" fill="#E8B4B0" transform="rotate(90 358 765)"/>
-        <ellipse cx="358" cy="765" rx="19" ry="11" fill="#D48A8B" transform="rotate(-52 358 765)"/>
-        <ellipse cx="358" cy="765" rx="19" ry="11" fill="#D48A8B" transform="rotate(52 358 765)"/>
-        <circle cx="358" cy="765" r="7.5" fill="#C97A7B"/>
-      </g>
+    <svg viewBox="0 0 300 800" width="100%" height="100%" preserveAspectRatio="xMaxYMid meet">
+      <path d="M290 80 Q160 220 260 450 T180 720" stroke="#7A8B6E" stroke-width="3" fill="none" opacity="0.6"/>
+      <circle cx="190" cy="200" r="40" fill="#E8B4B0" opacity="0.88"/>
+      <circle cx="252" cy="340" r="46" fill="#F0C2BD" opacity="0.85"/>
+      <circle cx="180" cy="540" r="36" fill="#DDB27C" opacity="0.82"/>
     </svg>
   </div>
 
-  <!-- ==================== COVER - SOFT LUXURY ==================== -->
   <div class="cover" id="cover">
     <div class="cover-card">
       <div class="monogram">M &nbsp;·&nbsp; A</div>
@@ -1063,8 +400,7 @@ input:focus, select:focus, textarea:focus {
   </div>
 
   <main>
-    <!-- QUOTE -->
-    <section style="padding-top: 135px;">
+    <section style="padding-top: 120px;">
       <div class="container narrow">
         <div class="quote-card glass reveal">
           <div class="script" style="font-size:2.35rem; color:var(--rose)">We Found Love</div>
@@ -1076,7 +412,6 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
-    <!-- MEMPELAI -->
     <section>
       <div class="container">
         <div class="section-head reveal">
@@ -1088,7 +423,7 @@ input:focus, select:focus, textarea:focus {
         <div class="couple-grid stagger">
           <article class="couple-card glass reveal">
             <div class="portrait">
-              <img src="/home/workdir/artifacts/imagine_images/cYkoM.jpg" alt="Midad">
+              <img src="midad.jpg" alt="Midad" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80';" />
             </div>
             <div class="couple-role">The Groom</div>
             <h3>Midad</h3>
@@ -1096,16 +431,16 @@ input:focus, select:focus, textarea:focus {
             <div class="parents-info">
               Putra Pertama dari<br>
               <strong>Bapak H. Ahmad Fauzi</strong><br>
-              &amp; <strong>Ibu Hj. Bunga Dahlia</strong>
+              & <strong>Ibu Hj. Bunga Dahlia</strong>
             </div>
             <a href="#" class="instagram" onclick="return false">◎ @midad</a>
           </article>
 
-          <div class="amp-divider reveal">&amp;</div>
+          <div class="amp-divider reveal">&</div>
 
           <article class="couple-card glass reveal">
             <div class="portrait">
-              <img src="/home/workdir/artifacts/imagine_images/QWGAG.jpg" alt="Arum">
+              <img src="arum.jpg" alt="Arum" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80';" />
             </div>
             <div class="couple-role">The Bride</div>
             <h3>Arum</h3>
@@ -1113,7 +448,7 @@ input:focus, select:focus, textarea:focus {
             <div class="parents-info">
               Putri Pertama dari<br>
               <strong>Bapak Abdul Faqih, M.T.</strong><br>
-              &amp; <strong>Ibu Susiyowati</strong>
+              & <strong>Ibu Susiyowati</strong>
             </div>
             <a href="#" class="instagram" onclick="return false">◎ @arum</a>
           </article>
@@ -1121,7 +456,6 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
-    <!-- COUNTDOWN -->
     <section>
       <div class="container narrow">
         <div class="section-head reveal">
@@ -1142,7 +476,6 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
-    <!-- EVENT DETAILS -->
     <section>
       <div class="container">
         <div class="section-head reveal">
@@ -1180,91 +513,6 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
-    <!-- DETAIL ACARA & PROTOKOL -->
-    <section style="background: linear-gradient(180deg, #F8F5EC, #F4EDE3);">
-      <div class="container">
-        <div class="section-head reveal">
-          <div class="script">For Our Beloved Guests</div>
-          <h2>Detail Acara &amp; Protokol</h2>
-          <p>Informasi lengkap agar hari bahagia kami berjalan lancar dan nyaman.</p>
-        </div>
-
-        <div class="protokol-grid stagger">
-          <div class="protokol-card glass reveal">
-            <h4>📅 Susunan Acara</h4>
-            <ul>
-              <li><strong>07.30 – 08.00</strong> Persiapan &amp; Kedatangan Tamu</li>
-              <li><strong>08.00 – 09.30</strong> Akad Nikah</li>
-              <li><strong>09.30 – 12.30</strong> Foto Bersama &amp; Istirahat</li>
-              <li><strong>13.00 – 17.00</strong> Resepsi &amp; Ramah Tamah</li>
-              <li><strong>17.00</strong> Penutupan</li>
-            </ul>
-          </div>
-
-          <div class="protokol-card glass reveal">
-            <h4>👔 Dress Code</h4>
-            <ul>
-              <li><strong>Pria:</strong> Kemeja formal / Batik modern + celana bahan (navy, earth tone, putih)</li>
-              <li><strong>Wanita:</strong> Kebaya modern, dress formal, atau batik (hindari putih solid)</li>
-              <li>Alas kaki nyaman untuk area outdoor</li>
-            </ul>
-          </div>
-
-          <div class="protokol-card glass reveal">
-            <h4>📋 Protokol</h4>
-            <ul>
-              <li>Hadir minimal 15 menit sebelum acara</li>
-              <li>Amplop / hadiah via transfer (lihat Wedding Gift)</li>
-              <li>Tidak ada penerimaan amplop di lokasi</li>
-              <li>Live streaming via Instagram</li>
-              <li>Merokok hanya di area yang disediakan</li>
-            </ul>
-          </div>
-
-          <div class="protokol-card glass reveal">
-            <h4>🚗 Parkir &amp; Akses</h4>
-            <ul>
-              <li>Area parkir tersedia di sekitar lokasi</li>
-              <li>Petugas akan membantu mengarahkan</li>
-              <li>Disarankan gunakan kendaraan pribadi atau ojek online</li>
-              <li>Lokasi mudah dijangkau dari jalan utama</li>
-            </ul>
-          </div>
-        </div>
-
-        <div style="text-align:center; margin-top:44px;">
-          <button class="outline-btn" onclick="window.open('https://wa.me/6281234567890?text=Halo%20Panitia%20Pernikahan%20Midad%20%26%20Arum', '_blank')">
-            💬 Hubungi Panitia via WhatsApp
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- LIVE STREAMING & DOA -->
-    <section>
-      <div class="container">
-        <div class="info-box-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
-          <div class="info-box glass reveal" style="padding:36px; text-align:center;">
-            <div style="font-size:2.15rem; margin-bottom:14px;">📹</div>
-            <div class="eyebrow">Virtual Event</div>
-            <h3 class="serif" style="margin:8px 0 12px; font-weight:400;">Live Streaming</h3>
-            <p style="color:var(--muted); font-size:.88rem; line-height:1.7;">Ikuti acara secara virtual melalui Instagram Live kami.</p>
-            <a href="#" class="outline-btn" style="margin-top:16px;" onclick="return false">Buka Instagram Live</a>
-          </div>
-
-          <div class="info-box glass reveal" style="padding:36px; text-align:center;">
-            <div class="eyebrow">Doa Pengantin</div>
-            <div class="arabic" style="margin:14px 0 8px; font-size:1.38rem;">بَارَكَ اللهُ لَكُمَا وَبَارَكَ عَلَيْكُمَا وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ</div>
-            <p style="color:var(--muted); font-size:.85rem; line-height:1.7;">
-              “Semoga Allah memberkahimu dan memberkahi apa yang menjadi tanggung jawabmu, serta menyatukan kalian berdua dalam kebaikan.”
-            </p>
-            <small style="color:var(--gold); font-weight:600;">(HR. Abu Dawud)</small>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- GALLERY -->
     <section>
       <div class="container">
         <div class="section-head reveal">
@@ -1273,18 +521,15 @@ input:focus, select:focus, textarea:focus {
           <p>Kenangan indah perjalanan kasih kami sebelum melangkah ke jenjang pernikahan.</p>
         </div>
 
-        <div class="gallery-grid stagger" id="galleryGrid">
-          <div class="gallery-item reveal" data-index="0"><img src="/home/workdir/artifacts/imagine_images/cYkoM.jpg" alt="Midad"></div>
-          <div class="gallery-item reveal" data-index="1"><img src="/home/workdir/artifacts/imagine_images/QWGAG.jpg" alt="Arum"></div>
-          <div class="gallery-item reveal" data-index="2"><img src="/home/workdir/artifacts/imagine_images/u4ILS.jpg" alt="Couple"></div>
-          <div class="gallery-item reveal" data-index="3"><img src="/home/workdir/artifacts/imagine_images/5t4Kt.jpg" alt="Couple"></div>
-          <div class="gallery-item reveal" data-index="0"><img src="/home/workdir/artifacts/imagine_images/cYkoM.jpg" alt="Midad"></div>
-          <div class="gallery-item reveal" data-index="1"><img src="/home/workdir/artifacts/imagine_images/QWGAG.jpg" alt="Arum"></div>
+        <div class="gallery-grid stagger">
+          <div class="gallery-item reveal"><img src="midad.jpg" alt="Midad" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80';" /></div>
+          <div class="gallery-item reveal"><img src="arum.jpg" alt="Arum" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80';" /></div>
+          <div class="gallery-item reveal"><img src="couple1.jpg" alt="Couple 1" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=500&q=80';" /></div>
+          <div class="gallery-item reveal"><img src="couple2.jpg" alt="Couple 2" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=500&q=80';" /></div>
         </div>
       </div>
     </section>
 
-    <!-- LOVE STORY -->
     <section>
       <div class="container narrow">
         <div class="section-head reveal">
@@ -1321,7 +566,6 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
-    <!-- WEDDING GIFT -->
     <section>
       <div class="container narrow">
         <div class="gift-card glass reveal">
@@ -1334,12 +578,11 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
-    <!-- RSVP -->
     <section>
       <div class="container">
         <div class="section-head reveal">
           <div class="script">Send Your Love</div>
-          <h2>Wishes &amp; RSVP</h2>
+          <h2>Wishes & RSVP</h2>
           <p>Tinggalkan ucapan doa dan konfirmasi kehadiran Anda.</p>
         </div>
 
@@ -1369,23 +612,21 @@ input:focus, select:focus, textarea:focus {
       </div>
     </section>
 
-    <!-- CLOSING -->
     <section class="closing">
       <div class="container narrow reveal">
         <div class="closing-photo">
-          <img src="/home/workdir/artifacts/imagine_images/u4ILS.jpg" alt="Midad & Arum">
+          <img src="couple1.jpg" alt="Midad & Arum" onerror="this.onerror=null; this.src='midad.jpg';" />
         </div>
         <p style="max-width:560px; margin:0 auto 22px; color:var(--muted); line-height:1.75; font-size:.9rem;">
           Merupakan suatu kebahagiaan dan kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.
         </p>
         <div class="eyebrow">Kami yang berbahagia,</div>
-        <h2>Midad <span class="script" style="color:var(--rose); font-size:.82em;">&amp;</span> Arum</h2>
+        <h2>Midad <span class="script" style="color:var(--rose); font-size:.82em;">&</span> Arum</h2>
       </div>
     </section>
   </main>
 </div>
 
-<!-- Music -->
 <div class="music-wrap">
   <div class="music-label">
     <b>Young and Beautiful</b><br>
@@ -1395,12 +636,11 @@ input:focus, select:focus, textarea:focus {
 </div>
 <div id="ytPlayer" class="yt-stage"></div>
 
-<!-- Gift Modal -->
 <div class="modal" id="giftModal">
   <div class="modal-card glass">
     <button class="close" id="closeModal">×</button>
     <div class="script" style="font-size:2.5rem; color:var(--rose)">Wedding Gift</div>
-    <h2 class="serif" style="font-weight:400; margin:6px 0 6px;">Digital Angpau</h2>
+    <h2 class="serif" style="font-weight:400; margin:6px 0;">Digital Angpau</h2>
     
     <div class="bank">
       <small>Bank BCA</small>
@@ -1408,26 +648,15 @@ input:focus, select:focus, textarea:focus {
       <span>a.n. Midad / Arum</span>
     </div>
     
-    <button class="outline-btn" id="copyGift" style="margin:22px auto 0; display:flex; align-items:center; gap:8px;">
+    <button class="outline-btn" id="copyGift" style="margin:20px auto 0; display:flex; align-items:center; gap:8px;">
       📋 Salin Nomor Rekening
     </button>
-  </div>
-</div>
-
-<!-- Lightbox -->
-<div class="lightbox-modal" id="lightboxModal">
-  <div class="lightbox-content">
-    <button class="lightbox-close" id="closeLightbox">×</button>
-    <img id="lightboxImg" alt="">
-    <button class="lightbox-nav prev" id="prevBtn">←</button>
-    <button class="lightbox-nav next" id="nextBtn">→</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ==================== JAVASCRIPT ====================
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
@@ -1450,68 +679,38 @@ function showToast(msg) {
   window.__toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
 }
 
-// ==================== ENHANCED PREMIUM PETALS ====================
-function createPremiumPetals() {
+// GENERATE PETALS
+function createPetals() {
   const container = $('#petalContainer');
-  const colors = ['pink', 'rose', 'cream', 'gold'];
-  
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 28; i++) {
     const petal = document.createElement('div');
-    petal.className = `petal ${colors[Math.floor(Math.random() * colors.length)]}`;
-    
-    const size = Math.random() * 13 + 11.5;
+    petal.className = 'petal';
+    const size = Math.random() * 12 + 10;
     petal.style.width = `${size}px`;
-    petal.style.height = `${size * 1.42}px`;
+    petal.style.height = `${size * 1.35}px`;
     petal.style.left = `${Math.random() * 100}vw`;
-    
-    const duration = Math.random() * 7.5 + 9;
-    const delay = Math.random() * -22;
-    
-    petal.style.animationDuration = `${duration}s`;
-    petal.style.animationDelay = `${delay}s`;
-    
-    const drift = (Math.random() - 0.5) * 200;
-    petal.style.setProperty('--drift', `${drift}px`);
-    
+    petal.style.animationDuration = `${Math.random() * 6 + 6}s`;
+    petal.style.animationDelay = `${Math.random() * 6}s`;
     container.appendChild(petal);
   }
-  
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes premiumPetalFall {
-      0% {
-        top: -14%;
-        opacity: 0;
-        transform: translateX(0) rotate(0deg);
-      }
-      12% { opacity: 0.92; }
-      88% { opacity: 0.88; }
-      100% {
-        top: 110%;
-        opacity: 0;
-        transform: translateX(var(--drift)) rotate(580deg);
-      }
-    }
-  `;
-  document.head.appendChild(style);
 }
-createPremiumPetals();
+createPetals();
 
-// ==================== MUSIC ====================
+// YOUTUBE MUSIC
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 document.head.appendChild(tag);
 
 window.onYouTubeIframeAPIReady = () => {
   player = new YT.Player('ytPlayer', {
-    height: '200',
-    width: '240',
+    height: '1',
+    width: '1',
     videoId: VIDEO_ID,
     playerVars: { playsinline: 1, controls: 0, loop: 1, playlist: VIDEO_ID, rel: 0 },
     events: {
       onReady: () => {
         playerReady = true;
-        player.setVolume(48);
+        player.setVolume(50);
         if (pendingPlay) { pendingPlay = false; startMusic(); }
       },
       onStateChange: (e) => {
@@ -1533,7 +732,7 @@ function startMusic() {
   if (!playerReady || !player) { pendingPlay = true; return; }
   try {
     player.unMute();
-    player.setVolume(48);
+    player.setVolume(50);
     player.playVideo();
   } catch(e) {
     showToast('Tap tombol musik untuk memutar lagu');
@@ -1548,28 +747,20 @@ musicBtn.addEventListener('click', () => {
   musicOn ? stopMusic() : startMusic();
 });
 
-// ==================== SOFT LUXURY OPENING ====================
+// OPENING COVER
 enterBtn.addEventListener('click', () => {
   cover.classList.add('is-open');
   document.body.classList.remove('locked');
   document.body.classList.add('opened');
-  
-  setTimeout(() => {
-    startMusic();
-  }, 600);
-  
-  setTimeout(() => {
-    cover.style.display = 'none';
-  }, 2000);
+  startMusic();
+  setTimeout(() => { cover.style.display = 'none'; }, 1400);
 });
 
-// ==================== COUNTDOWN ====================
+// COUNTDOWN
 const targetDate = new Date('2027-05-16T08:00:00+07:00').getTime();
-
 function updateCountdown() {
   const now = Date.now();
   const distance = Math.max(0, targetDate - now);
-
   const days = Math.floor(distance / (1000 * 60 * 60 * 24));
   const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -1580,11 +771,10 @@ function updateCountdown() {
   $('#minutes').textContent = String(minutes).padStart(2, '0');
   $('#seconds').textContent = String(seconds).padStart(2, '0');
 }
-
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-// ==================== SCROLL REVEAL ====================
+// SCROLL REVEAL
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -1592,166 +782,51 @@ const observer = new IntersectionObserver((entries) => {
       observer.unobserve(entry.target);
     }
   });
-}, { threshold: 0.12, rootMargin: "0px 0px -45px" });
+}, { threshold: 0.12, rootMargin: "0px 0px -30px" });
 
 $$('.reveal').forEach(el => observer.observe(el));
 
-// ==================== MAPS ====================
-const mapsAddress = "Jl. Sukosari, Dsn. Sukolilo, Jawa Timur";
+// MAPS & CALENDAR
 $$('.mapBtn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsAddress)}`;
-    window.open(url, '_blank');
+    window.open('https://maps.google.com/?q=Sukosari,Sukolilo,Jawa+Timur', '_blank');
   });
 });
+$('#calBtn').addEventListener('click', () => showToast('Jadwal berhasil ditambahkan ke kalender'));
 
-$('#calBtn').addEventListener('click', () => {
-  showToast('Jadwal berhasil ditambahkan ke kalender');
-});
-
-// ==================== GIFT MODAL ====================
+// GIFT MODAL
 const giftModal = $('#giftModal');
 $('#giftBtn').addEventListener('click', () => giftModal.classList.add('open'));
 $('#closeModal').addEventListener('click', () => giftModal.classList.remove('open'));
-giftModal.addEventListener('click', e => {
-  if (e.target === giftModal) giftModal.classList.remove('open');
-});
+giftModal.addEventListener('click', e => { if (e.target === giftModal) giftModal.classList.remove('open'); });
 
 $('#copyGift').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText('1234567890');
-    showToast('Nomor rekening berhasil disalin!');
+    showToast('Nomor BCA (1234567890) berhasil disalin!');
   } catch {
-    showToast('Nomor: 1234567890 (BCA)');
+    showToast('Nomor BCA: 1234567890');
   }
 });
 
-// ==================== GALLERY LIGHTBOX ====================
-const galleryItems = $$('.gallery-item');
-const lightbox = $('#lightboxModal');
-const lightboxImg = $('#lightboxImg');
-const closeLb = $('#closeLightbox');
-const prevLb = $('#prevBtn');
-const nextLb = $('#nextBtn');
-
-const galleryImages = [
-  '/home/workdir/artifacts/imagine_images/cYkoM.jpg',
-  '/home/workdir/artifacts/imagine_images/QWGAG.jpg',
-  '/home/workdir/artifacts/imagine_images/u4ILS.jpg',
-  '/home/workdir/artifacts/imagine_images/5t4Kt.jpg'
-];
-
-let currentLbIndex = 0;
-
-galleryItems.forEach((item, idx) => {
-  item.addEventListener('click', () => {
-    currentLbIndex = parseInt(item.dataset.index) || (idx % 4);
-    openLightbox(currentLbIndex);
-  });
-});
-
-function openLightbox(index) {
-  currentLbIndex = index;
-  lightboxImg.src = galleryImages[currentLbIndex];
-  lightbox.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLightbox() {
-  lightbox.classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-closeLb.addEventListener('click', closeLightbox);
-lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-
-prevLb.addEventListener('click', () => {
-  currentLbIndex = (currentLbIndex - 1 + galleryImages.length) % galleryImages.length;
-  lightboxImg.src = galleryImages[currentLbIndex];
-});
-
-nextLb.addEventListener('click', () => {
-  currentLbIndex = (currentLbIndex + 1) % galleryImages.length;
-  lightboxImg.src = galleryImages[currentLbIndex];
-});
-
-document.addEventListener('keydown', e => {
-  if (!lightbox.classList.contains('active')) return;
-  if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft') prevLb.click();
-  if (e.key === 'ArrowRight') nextLb.click();
-});
-
-// ==================== PERSISTENT RSVP ====================
+// RSVP FORM
 const rsvpForm = $('#rsvpForm');
 const wishesList = $('#wishesList');
-let countHadir = 14;
-let countAbsen = 4;
+let countHadir = 14, countAbsen = 4;
 
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
-function saveRSVP() {
-  const wishes = [];
-  $$('#wishesList .wish').forEach(el => {
-    const strong = el.querySelector('strong');
-    const p = el.querySelector('p');
-    if (strong && p) {
-      const match = strong.textContent.match(/(.*) \((Hadir|Tidak Hadir)\)/);
-      if (match) {
-        wishes.push({ name: match[1], att: match[2], msg: p.textContent });
-      }
-    }
-  });
-  
-  localStorage.setItem('midadArumWishes', JSON.stringify({
-    hadir: countHadir,
-    absen: countAbsen,
-    wishes: wishes
-  }));
-}
-
-function loadRSVP() {
-  const saved = localStorage.getItem('midadArumWishes');
-  if (!saved) return;
-
-  const data = JSON.parse(saved);
-  countHadir = data.hadir || 14;
-  countAbsen = data.absen || 4;
-  
-  $('#countHadir').textContent = countHadir;
-  $('#countAbsen').textContent = countAbsen;
-
-  if (data.wishes?.length) {
-    wishesList.innerHTML = '';
-    data.wishes.forEach(w => {
-      const div = document.createElement('div');
-      div.className = 'wish';
-      div.innerHTML = `<strong>${escapeHtml(w.name)} (${escapeHtml(w.att)}) ✔</strong><p>${escapeHtml(w.msg)}</p>`;
-      wishesList.appendChild(div);
-    });
-  }
-}
-
-loadRSVP();
-
 rsvpForm.addEventListener('submit', e => {
   e.preventDefault();
-  
   const name = $('#nameInput').value.trim();
   const att = $('#attendance').value;
   const msg = $('#messageInput').value.trim();
-  
   if (!name || !att || !msg) return;
 
-  if (att === 'Hadir') {
-    countHadir++;
-    $('#countHadir').textContent = countHadir;
-  } else {
-    countAbsen++;
-    $('#countAbsen').textContent = countAbsen;
-  }
+  if (att === 'Hadir') { countHadir++; $('#countHadir').textContent = countHadir; }
+  else { countAbsen++; $('#countAbsen').textContent = countAbsen; }
 
   const wishEl = document.createElement('div');
   wishEl.className = 'wish';
@@ -1760,21 +835,7 @@ rsvpForm.addEventListener('submit', e => {
 
   rsvpForm.reset();
   showToast('Terima kasih! Ucapan Anda telah tersimpan.');
-  saveRSVP();
 });
-
-// ==================== WHATSAPP SHARE ====================
-const shareBtn = document.createElement('button');
-shareBtn.className = 'primary-btn';
-shareBtn.style.cssText = 'position:fixed; bottom:94px; right:20px; z-index:950; font-size:0.68rem; padding:11px 19px; box-shadow:0 10px 25px rgba(190,128,130,.3)';
-shareBtn.innerHTML = '📤 Bagikan via WhatsApp';
-
-shareBtn.addEventListener('click', () => {
-  const text = `Assalamualaikum,%0A%0ADengan penuh rasa syukur, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri pernikahan kami:%0A%0A*Midad & Arum*%0A16 Mei 2027%0A%0ASilakan buka undangan digital:%0Ahttps://midad-arum-wedding.netlify.app%0A%0ATerima kasih atas doa dan kehadirannya 🙏`;
-  window.open(`https://wa.me/?text=${text}`, '_blank');
-});
-
-document.body.appendChild(shareBtn);
 </script>
 </body>
 </html>
