@@ -52,10 +52,10 @@ img{max-width:100%;display:block}
     linear-gradient(180deg, #FAF7F0 0%, var(--cream) 35%, #F3EBDD 100%);
 }
 
-/* ==================== 3D MARBLE ARCH WINDOW (STATIONARY) ==================== */
+/* ==================== 3D MARBLE ARCH WINDOW (BACKGROUND LAYER -3) ==================== */
 .arch-fixed {
   position: fixed;
-  z-index: 10;
+  z-index: -3; /* DITARUH DI LATAR BELAKANG */
   top: 18px;
   left: 50%;
   transform: translateX(-50%);
@@ -67,10 +67,10 @@ img{max-width:100%;display:block}
 .arch-svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 14px 28px rgba(88,66,50,0.12));
+  filter: drop-shadow(0 14px 28px rgba(88,66,50,0.08));
 }
 
-/* ==================== ANIMATED FLORAL SIDES ==================== */
+/* ==================== ANIMATED FLORAL SIDES (BACKGROUND LAYER -2) ==================== */
 @keyframes floralSwayLeft{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(1.2deg)}}
 @keyframes floralSwayRight{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(-1.2deg)}}
 
@@ -79,7 +79,7 @@ img{max-width:100%;display:block}
   top: 0;
   width: min(38vw, 420px);
   height: 100vh;
-  z-index: 11;
+  z-index: -2; /* DITARUH DI LATAR BELAKANG */
   pointer-events: none;
   opacity: 0.95;
 }
@@ -87,7 +87,7 @@ img{max-width:100%;display:block}
 .floral-side.left { left: 0; animation: floralSwayLeft 7.5s ease-in-out infinite; }
 .floral-side.right { right: 0; animation: floralSwayRight 8.5s ease-in-out infinite .5s; }
 
-/* ==================== FALLING PETALS ==================== */
+/* ==================== FALLING PETALS (LAYER 99) ==================== */
 .petal-container {
   position: fixed;
   inset: 0;
@@ -111,7 +111,7 @@ img{max-width:100%;display:block}
   100% { top: 105%; opacity: 0; transform: translateX(75px) rotate(420deg); }
 }
 
-/* ==================== COVER OVERLAY ==================== */
+/* ==================== COVER OVERLAY (LAYER 1000) ==================== */
 .cover {
   position: fixed;
   inset: 0;
@@ -135,7 +135,7 @@ img{max-width:100%;display:block}
   width: min(580px, 88vw);
   padding: 48px 26px 44px;
   text-align: center;
-  background: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.85);
   border: 1px solid rgba(255,255,255,.95);
   box-shadow: var(--shadow);
   border-radius: 280px 280px 28px 28px;
@@ -179,11 +179,11 @@ img{max-width:100%;display:block}
 
 .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(190,128,130,.38); }
 
-/* ==================== MAIN CARDS ==================== */
-main { position: relative; z-index: 1; }
+/* ==================== MAIN CONTENT (FOREGROUND LAYER 5) ==================== */
+main { position: relative; z-index: 5; /* BERADA DI DEPAN GERBANG */ }
 section { padding: 88px 20px; position: relative; }
-.container { width: min(860px, 90vw); margin: 0 auto; }
-.narrow { width: min(680px, 90vw); }
+.container { width: min(720px, 86vw); /* DISESUAIKAN AGAR MUAT DI DALAM LEBAR GERBANG */ margin: 0 auto; }
+.narrow { width: min(640px, 86vw); }
 
 .section-head { text-align: center; margin-bottom: 38px; }
 .section-head .script { font-size: 2.35rem; color: var(--rose); margin-bottom: -4px; }
@@ -206,13 +206,13 @@ section { padding: 88px 20px; position: relative; }
 .quote-card small { letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-size: .64rem; }
 
 /* Couple */
-.couple-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 28px; align-items: center; }
-.couple-card { padding: 34px 22px; text-align: center; }
+.couple-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center; }
+.couple-card { padding: 34px 20px; text-align: center; }
 .portrait {
-  width: 200px;
-  height: 250px;
-  margin: 0 auto 22px;
-  border-radius: 140px 140px 26px 26px;
+  width: 190px;
+  height: 240px;
+  margin: 0 auto 20px;
+  border-radius: 130px 130px 24px 24px;
   border: 7px solid rgba(255,255,255,.9);
   box-shadow: 0 16px 40px rgba(92,71,56,.14);
   overflow: hidden;
@@ -230,14 +230,14 @@ section { padding: 88px 20px; position: relative; }
 
 /* Countdown */
 .countdown-wrap { padding: 42px 24px; text-align: center; }
-.countdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-.time-box { text-align: center; padding: 20px 6px; border-radius: 18px; background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.9); }
-.time-box strong { font-family: 'Playfair Display', serif; font-weight: 400; font-size: clamp(1.9rem, 5.5vw, 3.2rem); display: block; color: var(--rose); }
-.time-box span { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.countdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+.time-box { text-align: center; padding: 18px 4px; border-radius: 18px; background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.9); }
+.time-box strong { font-family: 'Playfair Display', serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 3rem); display: block; color: var(--rose); }
+.time-box span { font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
 
 /* Events */
 .events { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.event-card { padding: 36px 26px; position: relative; text-align: center; }
+.event-card { padding: 36px 22px; position: relative; text-align: center; }
 .event-no { position: absolute; right: 20px; top: 12px; font-family: 'Playfair Display', serif; font-size: 4.8rem; color: rgba(183,154,105,.1); pointer-events: none; }
 .event-card h3 { font-family: 'Playfair Display', serif; font-size: 1.95rem; font-weight: 400; margin: 8px 0 14px; }
 .event-detail { display: grid; gap: 9px; color: var(--muted); font-size: .86rem; line-height: 1.6; }
@@ -260,7 +260,7 @@ section { padding: 88px 20px; position: relative; }
 .outline-btn:hover { background: var(--ink); color: white; }
 
 /* Gallery */
-.gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .gallery-item { aspect-ratio: 3/4; border-radius: 18px; overflow: hidden; background: #F5EDE3; border: 4px solid rgba(255,255,255,.9); box-shadow: 0 10px 25px rgba(88,66,50,.08); }
 .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -270,7 +270,7 @@ section { padding: 88px 20px; position: relative; }
 .story { display: grid; grid-template-columns: 1fr 54px 1fr; gap: 18px; align-items: center; margin: 28px 0; }
 .story:nth-child(even) .story-card { grid-column: 3; }
 .story:nth-child(even) .dot { grid-column: 2; grid-row: 1; }
-.story-card { grid-column: 1; padding: 28px; }
+.story-card { grid-column: 1; padding: 26px; }
 .story-year { font-family: 'Great Vibes', cursive; color: var(--rose); font-size: 1.75rem; }
 .story-card h3 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 1.45rem; margin: 0 0 8px; }
 .story-card p { margin: 0; color: var(--muted); font-size:.85rem; line-height: 1.75; }
@@ -280,7 +280,7 @@ section { padding: 88px 20px; position: relative; }
 .gift-card { padding: 44px 30px; text-align: center; }
 .gift-icon { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 16px; background: rgba(201,141,142,.12); font-size: 1.8rem; }
 .rsvp-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 20px; }
-.wishes-panel, .form-panel { padding: 30px; }
+.wishes-panel, .form-panel { padding: 28px; }
 .badge-wrap { display: flex; gap: 10px; margin-bottom: 20px; }
 .badge-box { flex: 1; padding: 12px; border-radius: 14px; text-align: center; color: white; font-weight: 600; font-size: .84rem; }
 .badge-box.hadir { background: #7A8B6E; }
@@ -298,7 +298,7 @@ textarea { min-height: 110px; resize: vertical; }
 .closing { text-align: center; padding-bottom: 140px; }
 .closing .script { font-size: 3.4rem; color: var(--rose); }
 .closing h2 { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 9vw, 5.6rem); font-weight: 400; letter-spacing: -.05em; margin: 8px 0 12px; }
-.closing-photo { width: min(320px, 80vw); aspect-ratio: 3/4; margin: 24px auto 30px; border-radius: 180px 180px 24px 24px; border: 8px solid rgba(255,255,255,.9); box-shadow: var(--shadow); overflow: hidden; background: #F5EDE3; }
+.closing-photo { width: min(300px, 78vw); aspect-ratio: 3/4; margin: 24px auto 30px; border-radius: 180px 180px 24px 24px; border: 8px solid rgba(255,255,255,.9); box-shadow: var(--shadow); overflow: hidden; background: #F5EDE3; }
 .closing-photo img { width: 100%; height: 100%; object-fit: cover; }
 
 /* Music Player */
@@ -336,8 +336,8 @@ textarea { min-height: 110px; resize: vertical; }
   .story { grid-template-columns: 44px 1fr; gap: 14px; }
   .story .dot, .story:nth-child(even) .dot { grid-column: 1; grid-row: 1; }
   .story .story-card, .story:nth-child(even) .story-card { grid-column: 2; grid-row: 1; }
-  .countdown { gap: 8px; }
-  .time-box { padding: 16px 4px; }
+  .countdown { gap: 6px; }
+  .time-box { padding: 14px 2px; }
   .music-label { display: none; }
 }
 </style>
@@ -383,7 +383,7 @@ textarea { min-height: 110px; resize: vertical; }
 
   <div class="cover" id="cover">
     <div class="cover-card">
-      <div class="monogram">M &nbsp;·&nbsp; A</div>
+      <div class="monogram">M  ·  A</div>
       <div class="eyebrow">The Wedding of</div>
       <h1 class="cover-title">Midad <span class="amp">&</span> Arum</h1>
       <div class="cover-date">16 · 05 · 2027</div>
@@ -789,7 +789,7 @@ $$('.reveal').forEach(el => observer.observe(el));
 // MAPS & CALENDAR
 $$('.mapBtn').forEach(btn => {
   btn.addEventListener('click', () => {
-    window.open('https://maps.google.com/?q=Sukosari,Sukolilo,Jawa+Timur', '_blank');
+    window.open('https://maps.google.com', '_blank');
   });
 });
 $('#calBtn').addEventListener('click', () => showToast('Jadwal berhasil ditambahkan ke kalender'));
