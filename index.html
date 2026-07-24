@@ -45,6 +45,17 @@
   --ease:cubic-bezier(.22,.78,.22,1);
   --ease-out:cubic-bezier(.16,1,.3,1);
 
+  /* Waktu sekuens pembuka — ubah di sini, semuanya ikut menyesuaikan */
+  --t-exit:1.5s;      /* Step 1: cover & gerbang luar keluar   */
+  --t-stage:2s;       /* Step 2: gerbang utama masuk           */
+  --d-stage:.5s;      /* Step 2 mulai di detik ke-              */
+  --d-eyebrow:1.8s;   /* Step 3                                */
+  --d-names:2.2s;
+  --d-date:2.6s;
+  --d-arrow:3s;
+
+  --marble:linear-gradient(158deg,#FCFAF5 0%,#F3ECE0 38%,#FAF5EA 58%,#EDE4D3 100%);
+
   --z-arch:0;
   --z-floral:1;
   --z-main:5;
@@ -92,12 +103,164 @@ ul{margin:0;padding:0;list-style:none}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ============================================================
-   3. SISTEM ANIMASI
+   3. SEKUENS PEMBUKA
    ------------------------------------------------------------
-   Semua gerakan hanya memakai transform + opacity, dua properti
-   yang bisa ditangani GPU tanpa menghitung ulang layout.
-   Jeda antar-elemen diatur lewat variabel --d yang diisi sekali
-   oleh JS saat halaman dimuat, bukan tiap frame.
+   STATE 0  cover + gerbang luar terlihat, gerbang utama opacity 0
+   STEP 1   0.0–1.5s  cover & gerbang luar membesar keluar layar
+   STEP 2   0.5–2.5s  gerbang utama + bunga mekar dari kecil & blur
+   STEP 3   1.8–3.9s  teks hero muncul bertahap
+   STEP 4   ~3.9s     kunci scroll dilepas
+   ============================================================ */
+
+/* --- STEP 1 --------------------------------------------------- */
+.cover{
+  position:fixed;
+  inset:0;
+  z-index:var(--z-cover);
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:linear-gradient(180deg,rgba(250,247,239,.97),rgba(243,236,223,.98));
+  touch-action:none;
+  overscroll-behavior:contain;
+  transition:opacity var(--t-exit) ease;
+}
+/* Gerbang luar: panel marmer di belakang kartu sampul. */
+.arch-outer-zoom{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:min(880px,98vw);
+  height:98vh;
+  height:98dvh;
+  transform:translate(-50%,-50%) scale(1);
+  border-radius:999px 999px 34px 34px;
+  border:1px solid var(--hairline);
+  background:var(--marble);
+  box-shadow:0 40px 90px rgba(88,66,50,.10), inset 0 1px 0 rgba(255,255,255,.92);
+  transition:transform var(--t-exit) cubic-bezier(.5,0,.75,0), opacity var(--t-exit) ease-in;
+  pointer-events:none;
+}
+.arch-outer-zoom::before{
+  content:'';
+  position:absolute;
+  inset:15px;
+  border:1px solid rgba(183,154,105,.26);
+  border-radius:999px 999px 20px 20px;
+}
+.cover-card{
+  position:relative;
+  z-index:2;
+  width:min(560px,90vw);
+  padding:46px 26px 42px;
+  text-align:center;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.95);
+  box-shadow:var(--shadow);
+  border-radius:280px 280px 28px 28px;
+  transition:transform var(--t-exit) cubic-bezier(.5,0,.75,0), opacity calc(var(--t-exit) * .8) ease-in;
+}
+.cover-card::before{
+  content:'';
+  position:absolute;
+  inset:12px;
+  border:1px solid rgba(183,154,105,.28);
+  border-radius:260px 260px 20px 20px;
+  pointer-events:none;
+}
+/* Gerbang luar melaju sedikit lebih cepat dari kartunya. Selisih
+   kecepatan inilah yang menciptakan ilusi kamera maju, bukan
+   sekadar layar yang membesar rata. */
+body.is-opened .arch-outer-zoom{transform:translate(-50%,-50%) scale(2.6);opacity:0}
+body.is-opened .cover-card    {transform:scale(2.2);opacity:0}
+body.is-opened .cover         {opacity:0;pointer-events:none}
+
+/* --- STEP 2 --------------------------------------------------- */
+/* Tiga lapis bersarang. Satu elemen hanya punya satu properti
+   transform, jadi zoom masuk, napas ambient, dan parallax scroll
+   tidak boleh menumpuk di elemen yang sama. */
+.arch-parallax{position:fixed;inset:0;z-index:var(--z-arch);pointer-events:none}
+.arch-entrance{position:absolute;inset:0;opacity:0;transform:scale(.88);filter:blur(8px)}
+.floral__entrance{position:absolute;inset:0;opacity:0;transform:scale(.88);filter:blur(8px)}
+
+@keyframes stageIn{
+  from{opacity:0;transform:scale(.88);filter:blur(8px)}
+  to  {opacity:1;transform:scale(1);  filter:blur(0)}
+}
+body.is-opened .arch-entrance,
+body.is-opened .floral__entrance{
+  animation:stageIn var(--t-stage) var(--ease-out) var(--d-stage) forwards;
+}
+/* Setelah mekar selesai, filter DICOPOT sepenuhnya — bukan disetel
+   ke blur(0). Elemen yang menyimpan properti filter tetap dipaksa
+   dirender ulang tiap frame, dan di dalamnya ada animasi napas yang
+   berjalan selamanya. Ini penyebab panas & boros baterai. */
+.arch-entrance.settled,
+.floral__entrance.settled{
+  animation:none;
+  opacity:1;
+  transform:none;
+  filter:none;
+}
+
+/* --- STEP 3 --------------------------------------------------- */
+.hero{
+  min-height:100vh;
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:96px 22px 60px;
+}
+.hero__eyebrow,.hero__names,.hero__date,.hero__scroll{
+  opacity:0;
+  transform:translate3d(0,26px,0);
+  transition:opacity .95s var(--ease-out), transform .95s var(--ease-out);
+}
+body.is-opened .hero__eyebrow{opacity:1;transform:none;transition-delay:var(--d-eyebrow)}
+body.is-opened .hero__names  {opacity:1;transform:none;transition-delay:var(--d-names)}
+body.is-opened .hero__date   {opacity:1;transform:none;transition-delay:var(--d-date)}
+body.is-opened .hero__scroll {opacity:1;transform:none;transition-delay:var(--d-arrow)}
+
+.hero__eyebrow{font-family:'Great Vibes',cursive;font-size:2.1rem;color:var(--rose);margin-bottom:6px}
+.hero__names{
+  font-family:'Playfair Display',serif;
+  font-weight:400;
+  font-size:clamp(2.9rem,12vw,5.6rem);
+  line-height:.95;
+  letter-spacing:-.04em;
+  margin:0;
+}
+.hero__names .amp{font-family:'Great Vibes',cursive;color:var(--rose);font-size:.52em;display:block;margin:.06em 0}
+.hero__date{margin-top:22px;letter-spacing:.34em;font-size:.74rem;color:var(--muted);text-transform:uppercase}
+.hero__scroll{margin-top:40px}
+.hero__scroll-icon{
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:54px;
+  margin:0 auto;
+  border:1px solid var(--hairline);
+  border-radius:999px;
+  color:var(--gold);
+  font-size:.9rem;
+  animation:arrowBounce 2s ease-in-out infinite;
+}
+@keyframes arrowBounce{
+  0%,100%{transform:translate3d(0,0,0);opacity:.75}
+  50%    {transform:translate3d(0,7px,0);opacity:1}
+}
+
+/* --- Kelopak menyala di Step 2 -------------------------------- */
+.petal-layer{
+  position:fixed;inset:0;z-index:var(--z-petal);
+  pointer-events:none;overflow:hidden;
+  opacity:0;transition:opacity 1.4s ease;
+}
+.petal-layer.is-on{opacity:1}
+
+/* ============================================================
+   4. SISTEM ANIMASI SCROLL (Step 4)
    ============================================================ */
 [data-anim]{
   opacity:0;
@@ -112,23 +275,17 @@ ul{margin:0;padding:0;list-style:none}
 [data-anim="grow"]  {transform:scale(.84)}
 [data-anim].is-in   {opacity:1;transform:none}
 
-/* Foto galeri: bingkainya naik, gambarnya melepas zoom. Dua kecepatan
-   berbeda inilah yang bikin reveal terasa "punya kedalaman". */
 .gallery-item img{transform:scale(1.14);transition:transform 1.3s var(--ease-out);transition-delay:var(--d,0ms)}
 .gallery-item.is-in img{transform:scale(1)}
 
-/* Nama penutup muncul huruf demi huruf */
 .ltr{
-  display:inline-block;
-  opacity:0;
+  display:inline-block;opacity:0;
   transform:translate3d(0,.42em,0);
   transition:opacity .75s var(--ease-out), transform .75s var(--ease-out);
   transition-delay:var(--d,0ms);
 }
 .is-in .ltr{opacity:1;transform:none}
 
-/* Latar bernapas: skala pelan yang bikin gerakan memancar dari tengah,
-   pola yang terlihat di rekaman referensi. */
 @keyframes archBreathe{
   0%,100%{transform:translateX(-50%) scale(1)}
   50%    {transform:translateX(-50%) scale(1.045)}
@@ -142,20 +299,17 @@ ul{margin:0;padding:0;list-style:none}
   50%    {transform:translate3d(0,-12px,0) rotate(-1.1deg) scale(1.035)}
 }
 
-/* Fallback kalau JS mati */
+/* Fallback tanpa JS */
 .no-js [data-anim],.no-js .ltr{opacity:1;transform:none}
 .no-js .gallery-item img{transform:none}
 .no-js .cover{display:none}
+.no-js .arch-entrance,.no-js .floral__entrance{opacity:1;transform:none;filter:none}
+.no-js .hero__eyebrow,.no-js .hero__names,.no-js .hero__date,.no-js .hero__scroll{opacity:1;transform:none}
 .no-js .petal-layer,.no-js .music-dock{display:none}
 
 /* ============================================================
-   4. LATAR: GERBANG MARMER (z 0)
-   ------------------------------------------------------------
-   Dua lapis: .arch-wrap digerakkan JS untuk parallax, .arch-fixed
-   punya animasi napasnya sendiri. Dipisah karena satu elemen tidak
-   bisa dikendalikan dua sumber transform sekaligus.
+   5. GERBANG MARMER UTAMA
    ============================================================ */
-.arch-wrap{position:fixed;inset:0;z-index:var(--z-arch);pointer-events:none;will-change:transform}
 .arch-fixed{
   position:absolute;
   top:2vh;
@@ -168,7 +322,7 @@ ul{margin:0;padding:0;list-style:none}
   border:1px solid var(--hairline);
   background:
     radial-gradient(120% 52% at 28% 6%, rgba(255,255,255,.95), rgba(255,255,255,0) 62%),
-    linear-gradient(158deg,#FCFAF5 0%,#F3ECE0 38%,#FAF5EA 58%,#EDE4D3 100%);
+    var(--marble);
   box-shadow:
     0 40px 90px rgba(88,66,50,.10),
     inset 0 1px 0 rgba(255,255,255,.92),
@@ -176,36 +330,68 @@ ul{margin:0;padding:0;list-style:none}
   animation:archBreathe 22s ease-in-out infinite;
 }
 .arch-fixed::before{
-  content:'';
-  position:absolute;
-  inset:16px;
+  content:'';position:absolute;inset:16px;
   border:1px solid rgba(183,154,105,.26);
   border-radius:999px 999px 24px 24px;
 }
 .arch-fixed::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
+  content:'';position:absolute;inset:0;border-radius:inherit;
   background:
     linear-gradient(72deg,transparent 43.6%,rgba(183,154,105,.11) 44.4%,transparent 45.2%),
     linear-gradient(100deg,transparent 61.5%,rgba(150,124,96,.085) 62.4%,transparent 63.4%),
     linear-gradient(21deg,transparent 27.6%,rgba(183,154,105,.07) 28.4%,transparent 29.2%);
 }
 
+/* --- Pilar marmer di tepi gerbang ---------------------------- */
+.arch-pillar{
+  position:absolute;
+  bottom:0;
+  width:clamp(46px,12%,104px);
+  height:76%;
+  pointer-events:none;
+  opacity:.96;
+}
+.arch-pillar--l{left:1.5%}
+.arch-pillar--r{right:1.5%}
+.arch-pillar svg{width:100%;height:100%;display:block}
+
+/* --- Karangan bunga bawah ------------------------------------ */
+.floral-bottom{
+  position:fixed;
+  left:0;right:0;
+  bottom:0;
+  height:clamp(110px,20vh,240px);
+  z-index:var(--z-floral);
+  pointer-events:none;
+  opacity:.88;
+}
+.floral-bottom svg{width:100%;height:100%;display:block}
+
 /* ============================================================
-   5. LATAR: BUNGA CAT AIR (z 1)
+   PAKAI ILUSTRASI CAT AIR ASLI (opsional)
+   ------------------------------------------------------------
+   Gambar vektor di bawah ini tidak akan pernah setara lukisan
+   cat air. Kalau kamu sudah punya berkas PNG/WEBP berlisensi,
+   taruh di repo lalu hapus tanda komentar blok ini — SVG-nya
+   otomatis disembunyikan dan diganti gambarmu.
+   ============================================================ */
+/*
+.arch-fixed{
+  background-image:url('arch-floral.png');
+  background-size:cover;
+  background-position:center top;
+}
+.arch-pillar,.floral svg,.floral-bottom{display:none !important}
+*/
+
+/* ============================================================
+   6. BUNGA CAT AIR
    ============================================================ */
 .floral{
-  position:fixed;
-  top:0;
-  z-index:var(--z-floral);
+  position:fixed;top:0;z-index:var(--z-floral);
   width:min(34vw,360px);
-  height:100vh;
-  height:100dvh;
-  pointer-events:none;
-  opacity:.9;
-  will-change:transform;
+  height:100vh;height:100dvh;
+  pointer-events:none;opacity:.9;
 }
 .floral--left{left:0}
 .floral--right{right:0}
@@ -215,12 +401,10 @@ ul{margin:0;padding:0;list-style:none}
 .floral svg{width:100%;height:100%}
 
 /* ============================================================
-   6. KELOPAK GUGUR (z 99)
+   7. KELOPAK
    ============================================================ */
-.petal-layer{position:fixed;inset:0;z-index:var(--z-petal);pointer-events:none;overflow:hidden}
 .petal{
-  position:absolute;
-  top:0;
+  position:absolute;top:0;
   border-radius:100% 0 100% 0;
   background:linear-gradient(135deg,rgba(240,196,192,.95),rgba(201,141,142,.7));
   box-shadow:0 2px 5px rgba(88,66,50,.08);
@@ -237,50 +421,8 @@ ul{margin:0;padding:0;list-style:none}
 }
 
 /* ============================================================
-   7. SAMPUL (z 1000)
+   8. SAMPUL — ISI KARTU
    ============================================================ */
-.cover{
-  position:fixed;
-  inset:0;
-  z-index:var(--z-cover);
-  display:grid;
-  place-items:center;
-  padding:20px;
-  background:linear-gradient(180deg,rgba(250,247,239,.985),rgba(243,236,223,.99));
-  transition:transform 1.15s var(--ease), opacity .8s ease;
-  touch-action:none;
-  overscroll-behavior:contain;
-}
-.cover.is-open{transform:translate3d(0,-104%,0);opacity:0;pointer-events:none}
-
-/* Isi sampul pamit satu per satu sebelum panelnya naik */
-.cover-card > *{transition:opacity .45s ease, transform .45s var(--ease)}
-.cover.is-leaving .cover-card > *{opacity:0;transform:translate3d(0,-16px,0)}
-.cover.is-leaving .cover-card > *:nth-child(1){transition-delay:0ms}
-.cover.is-leaving .cover-card > *:nth-child(2){transition-delay:45ms}
-.cover.is-leaving .cover-card > *:nth-child(3){transition-delay:90ms}
-.cover.is-leaving .cover-card > *:nth-child(4){transition-delay:135ms}
-.cover.is-leaving .cover-card > *:nth-child(5){transition-delay:180ms}
-.cover.is-leaving .cover-card > *:nth-child(6){transition-delay:225ms}
-
-.cover-card{
-  position:relative;
-  width:min(560px,90vw);
-  padding:46px 26px 42px;
-  text-align:center;
-  background:rgba(255,255,255,.86);
-  border:1px solid rgba(255,255,255,.95);
-  box-shadow:var(--shadow);
-  border-radius:280px 280px 28px 28px;
-}
-.cover-card::before{
-  content:'';
-  position:absolute;
-  inset:12px;
-  border:1px solid rgba(183,154,105,.28);
-  border-radius:260px 260px 20px 20px;
-  pointer-events:none;
-}
 .monogram{font-size:.8rem;letter-spacing:.55em;text-transform:uppercase;color:var(--gold);margin-bottom:22px;padding-left:.55em}
 .cover-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,9.2vw,5.8rem);line-height:.88;font-weight:400;margin:6px 0 0;letter-spacing:-.045em}
 .cover-title .amp{font-family:'Great Vibes',cursive;color:var(--rose);font-size:.72em;margin:0 .08em}
@@ -290,50 +432,33 @@ ul{margin:0;padding:0;list-style:none}
 .guest-name{font-family:'Playfair Display',serif;font-size:1.3rem;word-break:break-word}
 
 /* ============================================================
-   8. TOMBOL
+   9. TOMBOL
    ============================================================ */
 .btn-primary{
   border:0;
   background:linear-gradient(135deg,#BE8082,#D9A4A0);
-  color:#fff;
-  padding:15px 30px;
-  border-radius:999px;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  font-size:.66rem;
-  font-weight:500;
+  color:#fff;padding:15px 30px;border-radius:999px;
+  letter-spacing:.16em;text-transform:uppercase;font-size:.66rem;font-weight:500;
   box-shadow:0 12px 28px rgba(190,128,130,.28);
   cursor:pointer;
   transition:transform .28s ease, box-shadow .28s ease;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
 }
 .btn-primary:active{transform:scale(.97)}
 .btn-outline{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
   border:1px solid rgba(71,55,45,.2);
   background:rgba(255,255,255,.55);
-  padding:11px 22px;
-  border-radius:999px;
-  font-size:.66rem;
-  text-transform:uppercase;
-  letter-spacing:.14em;
-  cursor:pointer;
+  padding:11px 22px;border-radius:999px;
+  font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;cursor:pointer;
   transition:background .28s ease,color .28s ease,border-color .28s ease,transform .2s ease;
 }
 .btn-outline:active{transform:scale(.97)}
 .btn-text{
   background:none;border:0;cursor:pointer;
   font-size:.72rem;color:var(--muted);
-  border-bottom:1px solid var(--line);
-  padding:2px 0;margin-top:14px;
+  border-bottom:1px solid var(--line);padding:2px 0;margin-top:14px;
 }
-
 @media (hover:hover) and (pointer:fine){
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(190,128,130,.36)}
   .btn-outline:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -343,7 +468,7 @@ ul{margin:0;padding:0;list-style:none}
 }
 
 /* ============================================================
-   9. KONTEN UTAMA (z 5)
+   10. KONTEN
    ============================================================ */
 main{position:relative;z-index:var(--z-main)}
 .section{padding:80px 20px;position:relative}
@@ -360,8 +485,8 @@ main{position:relative;z-index:var(--z-main)}
   border:1px solid rgba(255,255,255,.95);
   box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.85);
   border-radius:26px;
+  transition:transform .35s var(--ease), box-shadow .35s var(--ease);
 }
-.glass{transition:transform .35s var(--ease), box-shadow .35s var(--ease), opacity .95s var(--ease-out)}
 [data-anim].glass{transition:opacity .95s var(--ease-out), transform .95s var(--ease-out);transition-delay:var(--d,0ms)}
 
 .ornament{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 26px;max-width:220px;color:var(--gold)}
@@ -376,14 +501,11 @@ main{position:relative;z-index:var(--z-main)}
 .couple-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:center}
 .couple-card{padding:34px 20px;text-align:center}
 .portrait{
-  width:min(190px,52vw);
-  aspect-ratio:19/24;
-  margin:0 auto 20px;
+  width:min(190px,52vw);aspect-ratio:19/24;margin:0 auto 20px;
   border-radius:130px 130px 24px 24px;
   border:7px solid rgba(255,255,255,.92);
   box-shadow:0 16px 40px rgba(92,71,56,.14);
-  overflow:hidden;
-  background:#EFE8DB;
+  overflow:hidden;background:#EFE8DB;
 }
 .portrait img{width:100%;height:100%;object-fit:cover;object-position:center top}
 .couple-role{font-family:'Great Vibes',cursive;color:var(--rose);font-size:1.7rem}
@@ -482,7 +604,8 @@ textarea{min-height:108px;resize:vertical}
 .closing-photo img{width:100%;height:100%;object-fit:cover}
 .closing p{max-width:520px;margin:0 auto 20px;color:var(--muted);line-height:1.75;font-size:.9rem}
 
-.music-dock{position:fixed;z-index:var(--z-music);right:16px;bottom:calc(16px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px}
+.music-dock{position:fixed;z-index:var(--z-music);right:16px;bottom:calc(16px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .8s ease}
+body.is-opened .music-dock{opacity:1}
 .music-label{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.95);padding:8px 12px;border-radius:14px;font-size:.58rem;color:var(--muted);line-height:1.5;box-shadow:0 6px 18px rgba(88,66,50,.1)}
 .music-label b{display:block;color:var(--ink);font-weight:500;font-size:.66rem}
 .music-btn{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.95);background:linear-gradient(145deg,#C88688,#E3B4AD);color:#fff;display:grid;place-items:center;box-shadow:0 14px 30px rgba(190,128,130,.32);cursor:pointer;font-size:1.1rem;flex:none}
@@ -515,11 +638,9 @@ textarea{min-height:108px;resize:vertical}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 /* ============================================================
-   10. RESPONSIF
+   11. RESPONSIF
    ============================================================ */
-@media (max-width:860px){
-  .two-col{grid-template-columns:1fr}
-}
+@media (max-width:860px){ .two-col{grid-template-columns:1fr} }
 @media (max-width:780px){
   .section{padding:64px 16px}
   .floral{width:42vw;opacity:.62}
@@ -530,14 +651,19 @@ textarea{min-height:108px;resize:vertical}
   .story{grid-template-columns:44px 1fr;gap:14px;margin:20px 0}
   .story-card,.story--right .story-card{grid-column:2;grid-row:1}
   .dot{grid-column:1;grid-row:1}
-  /* Di layar sempit semua kartu naik lurus — geser kiri/kanan bikin
-     scrollbar horizontal muncul sekejap. */
   [data-anim="left"],[data-anim="right"]{transform:translate3d(0,34px,0)}
   .countdown{gap:6px}
   .time-box{padding:14px 2px}
   .music-label{display:none}
   .rundown li{grid-template-columns:78px 1fr;gap:10px}
   .rundown{padding:26px 20px}
+  /* Blur diperkecil di HP. Blur adalah satu-satunya efek di halaman
+     ini yang tidak bisa ditangani GPU tanpa render ulang tiap frame. */
+  .arch-entrance,.floral__entrance{filter:blur(5px)}
+  @keyframes stageIn{
+    from{opacity:0;transform:scale(.9);filter:blur(5px)}
+    to  {opacity:1;transform:scale(1);filter:blur(0)}
+  }
 }
 @media (max-width:380px){
   .cover-card{padding:38px 18px 34px}
@@ -545,7 +671,7 @@ textarea{min-height:108px;resize:vertical}
 }
 
 /* ============================================================
-   11. HORMATI PREFERENSI GERAK MINIM
+   12. GERAK MINIM
    ============================================================ */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
@@ -557,93 +683,327 @@ textarea{min-height:108px;resize:vertical}
   [data-anim],.ltr{opacity:1 !important;transform:none !important}
   .gallery-item img{transform:none !important}
   .timeline::before{transform:scaleY(1) !important}
+  .arch-entrance,.floral__entrance{opacity:1 !important;transform:none !important;filter:none !important}
+  .hero__eyebrow,.hero__names,.hero__date,.hero__scroll{opacity:1 !important;transform:none !important}
   .petal-layer{display:none}
-  .cover.is-open{display:none}
+  .music-dock{opacity:1}
 }
 
 @media print{
-  .cover,.petal-layer,.music-dock,.floral,.arch-wrap,.modal,.lightbox,.toast{display:none !important}
-  [data-anim],.ltr{opacity:1 !important;transform:none !important}
+  .cover,.petal-layer,.music-dock,.floral,.floral-bottom,.arch-parallax,.modal,.lightbox,.toast{display:none !important}
+  [data-anim],.ltr,.hero__eyebrow,.hero__names,.hero__date{opacity:1 !important;transform:none !important}
 }
 </style>
 </head>
 <body>
 <script>document.documentElement.classList.remove('no-js');</script>
 
-<!-- ===== LATAR: GERBANG (z 0) ===== -->
-<div class="arch-wrap" id="archWrap" aria-hidden="true">
-  <div class="arch-fixed"></div>
+<!-- ===== STEP 2: GERBANG UTAMA (z 0) — tiga lapis transform ===== -->
+<div class="arch-parallax" id="archParallax" aria-hidden="true">
+  <div class="arch-entrance" id="archEntrance">
+    <div class="arch-fixed">
+
+      <!-- Pilar kiri: dasar, poros beralur, leher, volut Ionik, abakus -->
+      <div class="arch-pillar arch-pillar--l">
+        <svg viewBox="0 0 120 700" preserveAspectRatio="xMidYMax meet" focusable="false">
+          <defs>
+            <linearGradient id="pilL" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#E4D9C6"/>
+              <stop offset="16%"  stop-color="#FCF9F3"/>
+              <stop offset="44%"  stop-color="#F6F1E6"/>
+              <stop offset="74%"  stop-color="#ECE2D1"/>
+              <stop offset="100%" stop-color="#DBCEB8"/>
+            </linearGradient>
+          </defs>
+          <g fill="url(#pilL)">
+            <rect x="6"  y="674" width="108" height="26" rx="3"/>
+            <rect x="13" y="658" width="94"  height="18" rx="3"/>
+            <rect x="26" y="98"  width="68"  height="562"/>
+            <rect x="23" y="86"  width="74"  height="13" rx="2"/>
+            <rect x="17" y="54"  width="86"  height="13" rx="2"/>
+            <rect x="9"  y="36"  width="102" height="19" rx="3"/>
+          </g>
+          <g stroke="#D8CBB4" stroke-width="1.1" opacity=".5">
+            <line x1="37" y1="106" x2="37" y2="654"/>
+            <line x1="48" y1="106" x2="48" y2="654"/>
+            <line x1="60" y1="106" x2="60" y2="654"/>
+            <line x1="72" y1="106" x2="72" y2="654"/>
+            <line x1="83" y1="106" x2="83" y2="654"/>
+          </g>
+          <g fill="none" stroke="#DCCFB9" stroke-width="5" stroke-linecap="round">
+            <path d="M24 60 C 9 60, 6 79, 20 84 C 32 88, 39 75, 31 69 C 25 65, 19 70, 22 76"/>
+            <path d="M96 60 C 111 60, 114 79, 100 84 C 88 88, 81 75, 89 69 C 95 65, 101 70, 98 76"/>
+          </g>
+          <rect x="9" y="36" width="102" height="19" rx="3" fill="none" stroke="#D5C7AF" stroke-width="1" opacity=".6"/>
+        </svg>
+      </div>
+
+      <!-- Pilar kanan: markup sama, id gradien berbeda supaya tidak bentrok -->
+      <div class="arch-pillar arch-pillar--r">
+        <svg viewBox="0 0 120 700" preserveAspectRatio="xMidYMax meet" focusable="false">
+          <defs>
+            <linearGradient id="pilR" x1="1" y1="0" x2="0" y2="0">
+              <stop offset="0%"   stop-color="#E4D9C6"/>
+              <stop offset="16%"  stop-color="#FCF9F3"/>
+              <stop offset="44%"  stop-color="#F6F1E6"/>
+              <stop offset="74%"  stop-color="#ECE2D1"/>
+              <stop offset="100%" stop-color="#DBCEB8"/>
+            </linearGradient>
+          </defs>
+          <g fill="url(#pilR)">
+            <rect x="6"  y="674" width="108" height="26" rx="3"/>
+            <rect x="13" y="658" width="94"  height="18" rx="3"/>
+            <rect x="26" y="98"  width="68"  height="562"/>
+            <rect x="23" y="86"  width="74"  height="13" rx="2"/>
+            <rect x="17" y="54"  width="86"  height="13" rx="2"/>
+            <rect x="9"  y="36"  width="102" height="19" rx="3"/>
+          </g>
+          <g stroke="#D8CBB4" stroke-width="1.1" opacity=".5">
+            <line x1="37" y1="106" x2="37" y2="654"/>
+            <line x1="48" y1="106" x2="48" y2="654"/>
+            <line x1="60" y1="106" x2="60" y2="654"/>
+            <line x1="72" y1="106" x2="72" y2="654"/>
+            <line x1="83" y1="106" x2="83" y2="654"/>
+          </g>
+          <g fill="none" stroke="#DCCFB9" stroke-width="5" stroke-linecap="round">
+            <path d="M24 60 C 9 60, 6 79, 20 84 C 32 88, 39 75, 31 69 C 25 65, 19 70, 22 76"/>
+            <path d="M96 60 C 111 60, 114 79, 100 84 C 88 88, 81 75, 89 69 C 95 65, 101 70, 98 76"/>
+          </g>
+          <rect x="9" y="36" width="102" height="19" rx="3" fill="none" stroke="#D5C7AF" stroke-width="1" opacity=".6"/>
+        </svg>
+      </div>
+
+    </div>
+  </div>
 </div>
 
-<!-- ===== LATAR: BUNGA (z 1) ===== -->
+<!-- ===== BUNGA (z 1) ===== -->
 <div class="floral floral--left" id="floralL" aria-hidden="true">
-  <div class="floral__art">
-    <svg viewBox="0 0 300 900" preserveAspectRatio="xMinYMid meet" focusable="false">
-      <defs>
-        <radialGradient id="roseL" cx="34%" cy="28%" r="72%">
-          <stop offset="0%" stop-color="#FCE7E2"/><stop offset="52%" stop-color="#EEBAB5"/><stop offset="100%" stop-color="#C98D8E" stop-opacity=".68"/>
-        </radialGradient>
-        <radialGradient id="goldL" cx="34%" cy="28%" r="72%">
-          <stop offset="0%" stop-color="#F5EBD4"/><stop offset="100%" stop-color="#B79A69" stop-opacity=".55"/>
-        </radialGradient>
-        <linearGradient id="leafL" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#A3B396"/><stop offset="100%" stop-color="#7A8B6E"/>
-        </linearGradient>
-      </defs>
-      <g opacity=".92">
-        <path d="M-20 30 C 95 175, 15 300, 78 440 C 135 570, 20 690, 95 880" fill="none" stroke="url(#leafL)" stroke-width="3" stroke-linecap="round" opacity=".55"/>
-        <path d="M62 205 C 18 186, 6 142, 40 122 C 74 148, 84 190, 62 205 Z" fill="url(#leafL)" opacity=".45"/>
-        <path d="M74 470 C 118 452, 136 408, 106 386 C 72 412, 58 454, 74 470 Z" fill="url(#leafL)" opacity=".4"/>
-        <path d="M60 700 C 16 682, 4 638, 38 618 C 72 644, 82 686, 60 700 Z" fill="url(#leafL)" opacity=".42"/>
-        <circle cx="104" cy="196" r="44" fill="url(#roseL)"/>
-        <circle cx="96" cy="188" r="28" fill="#E4A5A1" opacity=".55"/>
-        <circle cx="44" cy="336" r="50" fill="url(#roseL)" opacity=".85"/>
-        <circle cx="38" cy="330" r="30" fill="#F0C4BF" opacity=".6"/>
-        <circle cx="112" cy="548" r="38" fill="url(#goldL)" opacity=".85"/>
-        <circle cx="52" cy="742" r="42" fill="url(#roseL)" opacity=".78"/>
-        <circle cx="120" cy="120" r="20" fill="url(#goldL)" opacity=".7"/>
-        <circle cx="24" cy="612" r="18" fill="url(#goldL)" opacity=".6"/>
-      </g>
-    </svg>
+  <div class="floral__entrance">
+    <div class="floral__art">
+      <svg viewBox="0 0 300 900" preserveAspectRatio="xMinYMid meet" xmlns:xlink="http://www.w3.org/1999/xlink" focusable="false">
+        <defs>
+          <radialGradient id="rzL" cx="36%" cy="26%" r="74%">
+            <stop offset="0%" stop-color="#FDEEEA"/><stop offset="46%" stop-color="#F0BFBA"/><stop offset="100%" stop-color="#C9878A" stop-opacity=".88"/>
+          </radialGradient>
+          <radialGradient id="rzL2" cx="38%" cy="28%" r="72%">
+            <stop offset="0%" stop-color="#FFF7F3"/><stop offset="58%" stop-color="#F7D8D1"/><stop offset="100%" stop-color="#DCA5A1" stop-opacity=".85"/>
+          </radialGradient>
+          <radialGradient id="hyL" cx="40%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#EDF2FB"/><stop offset="100%" stop-color="#B6C5E1" stop-opacity=".85"/>
+          </radialGradient>
+          <radialGradient id="gdL" cx="36%" cy="28%" r="72%">
+            <stop offset="0%" stop-color="#FCF4E1"/><stop offset="100%" stop-color="#C8AC7C" stop-opacity=".8"/>
+          </radialGradient>
+          <linearGradient id="lfL" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#A9B99C"/><stop offset="100%" stop-color="#6F8163"/>
+          </linearGradient>
+
+          <!-- Mawar berlapis: kelopak luar, cincin tengah, mata bunga -->
+          <g id="bloomL">
+            <circle r="30" fill="url(#rzL)"/>
+            <path d="M-23 5 A23 23 0 0 1 23 5 A17 17 0 0 0 -23 5 Z" fill="#EFC1BC" opacity=".55"/>
+            <circle cy="-2" r="17" fill="url(#rzL2)"/>
+            <circle cy="-3" r="9"  fill="#DFA09C" opacity=".7"/>
+            <circle cy="-4" r="3.5" fill="#C57F82"/>
+          </g>
+          <!-- Hidrangea: gerombolan kuntum kecil -->
+          <g id="hydL">
+            <circle cx="-11" cy="-7" r="8" fill="url(#hyL)"/>
+            <circle cx="4"   cy="-11" r="8" fill="url(#hyL)"/>
+            <circle cx="12"  cy="2"  r="8" fill="url(#hyL)"/>
+            <circle cx="-2"  cy="9"  r="8" fill="url(#hyL)"/>
+            <circle cx="-14" cy="6"  r="7" fill="url(#hyL)"/>
+            <circle cx="0"   cy="-1" r="6" fill="#DCE5F4" opacity=".9"/>
+          </g>
+          <!-- Ranting daun -->
+          <g id="sprigL">
+            <path d="M0 0 C 20 -18, 46 -26, 72 -22" fill="none" stroke="url(#lfL)" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>
+            <ellipse cx="18" cy="-14" rx="10" ry="5" fill="url(#lfL)" opacity=".75" transform="rotate(-24 18 -14)"/>
+            <ellipse cx="38" cy="-22" rx="11" ry="5" fill="url(#lfL)" opacity=".7"  transform="rotate(-14 38 -22)"/>
+            <ellipse cx="60" cy="-24" rx="9"  ry="4.5" fill="url(#lfL)" opacity=".65" transform="rotate(-6 60 -24)"/>
+          </g>
+        </defs>
+
+        <g opacity=".95">
+          <path d="M-20 30 C 95 175, 15 300, 78 440 C 135 570, 20 690, 95 880"
+                fill="none" stroke="url(#lfL)" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+
+          <use href="#sprigL" xlink:href="#sprigL" transform="translate(6,268) scale(1.1)"/>
+          <use href="#sprigL" xlink:href="#sprigL" transform="translate(20,470) scale(.95) rotate(18)"/>
+          <use href="#sprigL" xlink:href="#sprigL" transform="translate(0,650) scale(1.05) rotate(-8)"/>
+          <use href="#sprigL" xlink:href="#sprigL" transform="translate(30,806) scale(.9) rotate(10)"/>
+
+          <use href="#bloomL" xlink:href="#bloomL" transform="translate(104,196) scale(1.12)"/>
+          <use href="#bloomL" xlink:href="#bloomL" transform="translate(44,336) scale(1.32)"/>
+          <use href="#bloomL" xlink:href="#bloomL" transform="translate(52,742) scale(1.18)"/>
+          <use href="#bloomL" xlink:href="#bloomL" transform="translate(118,592) scale(.82)"/>
+
+          <use href="#hydL" xlink:href="#hydL" transform="translate(112,268) scale(1.15)"/>
+          <use href="#hydL" xlink:href="#hydL" transform="translate(20,414) scale(1)"/>
+          <use href="#hydL" xlink:href="#hydL" transform="translate(96,806) scale(1.1)"/>
+
+          <circle cx="112" cy="548" r="26" fill="url(#gdL)" opacity=".85"/>
+          <circle cx="124" cy="122" r="19" fill="url(#gdL)" opacity=".72"/>
+          <circle cx="26"  cy="612" r="16" fill="url(#gdL)" opacity=".6"/>
+        </g>
+      </svg>
+    </div>
   </div>
 </div>
 
 <div class="floral floral--right" id="floralR" aria-hidden="true">
-  <div class="floral__art">
-    <svg viewBox="0 0 300 900" preserveAspectRatio="xMaxYMid meet" focusable="false">
+  <div class="floral__entrance">
+    <div class="floral__art">
+      <svg viewBox="0 0 300 900" preserveAspectRatio="xMaxYMid meet" xmlns:xlink="http://www.w3.org/1999/xlink" focusable="false">
+        <defs>
+          <radialGradient id="rzR" cx="36%" cy="26%" r="74%">
+            <stop offset="0%" stop-color="#FDEEEA"/><stop offset="46%" stop-color="#F0BFBA"/><stop offset="100%" stop-color="#C9878A" stop-opacity=".88"/>
+          </radialGradient>
+          <radialGradient id="rzR2" cx="38%" cy="28%" r="72%">
+            <stop offset="0%" stop-color="#FFF7F3"/><stop offset="58%" stop-color="#F7D8D1"/><stop offset="100%" stop-color="#DCA5A1" stop-opacity=".85"/>
+          </radialGradient>
+          <radialGradient id="hyR" cx="40%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#EDF2FB"/><stop offset="100%" stop-color="#B6C5E1" stop-opacity=".85"/>
+          </radialGradient>
+          <radialGradient id="gdR" cx="36%" cy="28%" r="72%">
+            <stop offset="0%" stop-color="#FCF4E1"/><stop offset="100%" stop-color="#C8AC7C" stop-opacity=".8"/>
+          </radialGradient>
+          <linearGradient id="lfR" x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#A9B99C"/><stop offset="100%" stop-color="#6F8163"/>
+          </linearGradient>
+
+          <g id="bloomR">
+            <circle r="30" fill="url(#rzR)"/>
+            <path d="M-23 5 A23 23 0 0 1 23 5 A17 17 0 0 0 -23 5 Z" fill="#EFC1BC" opacity=".55"/>
+            <circle cy="-2" r="17" fill="url(#rzR2)"/>
+            <circle cy="-3" r="9"  fill="#DFA09C" opacity=".7"/>
+            <circle cy="-4" r="3.5" fill="#C57F82"/>
+          </g>
+          <g id="hydR">
+            <circle cx="11"  cy="-7"  r="8" fill="url(#hyR)"/>
+            <circle cx="-4"  cy="-11" r="8" fill="url(#hyR)"/>
+            <circle cx="-12" cy="2"   r="8" fill="url(#hyR)"/>
+            <circle cx="2"   cy="9"   r="8" fill="url(#hyR)"/>
+            <circle cx="14"  cy="6"   r="7" fill="url(#hyR)"/>
+            <circle cx="0"   cy="-1"  r="6" fill="#DCE5F4" opacity=".9"/>
+          </g>
+          <g id="sprigR">
+            <path d="M0 0 C -20 -18, -46 -26, -72 -22" fill="none" stroke="url(#lfR)" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>
+            <ellipse cx="-18" cy="-14" rx="10" ry="5" fill="url(#lfR)" opacity=".75" transform="rotate(24 -18 -14)"/>
+            <ellipse cx="-38" cy="-22" rx="11" ry="5" fill="url(#lfR)" opacity=".7"  transform="rotate(14 -38 -22)"/>
+            <ellipse cx="-60" cy="-24" rx="9"  ry="4.5" fill="url(#lfR)" opacity=".65" transform="rotate(6 -60 -24)"/>
+          </g>
+        </defs>
+
+        <g opacity=".95">
+          <path d="M320 30 C 205 175, 285 300, 222 440 C 165 570, 280 690, 205 880"
+                fill="none" stroke="url(#lfR)" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+
+          <use href="#sprigR" xlink:href="#sprigR" transform="translate(294,268) scale(1.1)"/>
+          <use href="#sprigR" xlink:href="#sprigR" transform="translate(280,470) scale(.95) rotate(-18)"/>
+          <use href="#sprigR" xlink:href="#sprigR" transform="translate(300,650) scale(1.05) rotate(8)"/>
+          <use href="#sprigR" xlink:href="#sprigR" transform="translate(270,806) scale(.9) rotate(-10)"/>
+
+          <use href="#bloomR" xlink:href="#bloomR" transform="translate(196,196) scale(1.12)"/>
+          <use href="#bloomR" xlink:href="#bloomR" transform="translate(256,336) scale(1.32)"/>
+          <use href="#bloomR" xlink:href="#bloomR" transform="translate(248,742) scale(1.18)"/>
+          <use href="#bloomR" xlink:href="#bloomR" transform="translate(182,592) scale(.82)"/>
+
+          <use href="#hydR" xlink:href="#hydR" transform="translate(188,268) scale(1.15)"/>
+          <use href="#hydR" xlink:href="#hydR" transform="translate(280,414) scale(1)"/>
+          <use href="#hydR" xlink:href="#hydR" transform="translate(204,806) scale(1.1)"/>
+
+          <circle cx="188" cy="548" r="26" fill="url(#gdR)" opacity=".85"/>
+          <circle cx="176" cy="122" r="19" fill="url(#gdR)" opacity=".72"/>
+          <circle cx="274" cy="612" r="16" fill="url(#gdR)" opacity=".6"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARANGAN BUNGA BAWAH (z 1) ===== -->
+<div class="floral-bottom" aria-hidden="true">
+  <div class="floral__entrance">
+    <svg viewBox="0 0 1200 260" preserveAspectRatio="xMidYMax slice" xmlns:xlink="http://www.w3.org/1999/xlink" focusable="false">
       <defs>
-        <radialGradient id="roseR" cx="34%" cy="28%" r="72%">
-          <stop offset="0%" stop-color="#FCE7E2"/><stop offset="52%" stop-color="#EEBAB5"/><stop offset="100%" stop-color="#C98D8E" stop-opacity=".68"/>
+        <radialGradient id="rzB" cx="36%" cy="26%" r="74%">
+          <stop offset="0%" stop-color="#FDEEEA"/><stop offset="46%" stop-color="#F0BFBA"/><stop offset="100%" stop-color="#C9878A" stop-opacity=".88"/>
         </radialGradient>
-        <radialGradient id="goldR" cx="34%" cy="28%" r="72%">
-          <stop offset="0%" stop-color="#F5EBD4"/><stop offset="100%" stop-color="#B79A69" stop-opacity=".55"/>
+        <radialGradient id="rzB2" cx="38%" cy="28%" r="72%">
+          <stop offset="0%" stop-color="#FFF7F3"/><stop offset="58%" stop-color="#F7D8D1"/><stop offset="100%" stop-color="#DCA5A1" stop-opacity=".85"/>
         </radialGradient>
-        <linearGradient id="leafR" x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#A3B396"/><stop offset="100%" stop-color="#7A8B6E"/>
+        <linearGradient id="lilB" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFF4F2"/><stop offset="70%" stop-color="#F3CBCF"/><stop offset="100%" stop-color="#DFA0AA" stop-opacity=".9"/>
         </linearGradient>
+        <linearGradient id="lfB" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#A9B99C"/><stop offset="100%" stop-color="#6F8163"/>
+        </linearGradient>
+
+        <g id="roseB">
+          <circle r="30" fill="url(#rzB)"/>
+          <path d="M-23 5 A23 23 0 0 1 23 5 A17 17 0 0 0 -23 5 Z" fill="#EFC1BC" opacity=".55"/>
+          <circle cy="-2" r="17" fill="url(#rzB2)"/>
+          <circle cy="-3" r="9"  fill="#DFA09C" opacity=".7"/>
+          <circle cy="-4" r="3.5" fill="#C57F82"/>
+        </g>
+        <!-- Lili: lima kelopak lancip memancar dari titik pusat -->
+        <g id="lilyB">
+          <g fill="url(#lilB)" opacity=".92">
+            <ellipse cy="-26" rx="9" ry="28"/>
+            <ellipse cy="-26" rx="9" ry="28" transform="rotate(72)"/>
+            <ellipse cy="-26" rx="9" ry="28" transform="rotate(144)"/>
+            <ellipse cy="-26" rx="9" ry="28" transform="rotate(216)"/>
+            <ellipse cy="-26" rx="9" ry="28" transform="rotate(288)"/>
+          </g>
+          <circle r="5" fill="#E3B79E" opacity=".85"/>
+        </g>
+        <g id="leafB">
+          <ellipse rx="26" ry="10" fill="url(#lfB)" opacity=".62"/>
+        </g>
       </defs>
-      <g opacity=".92">
-        <path d="M320 30 C 205 175, 285 300, 222 440 C 165 570, 280 690, 205 880" fill="none" stroke="url(#leafR)" stroke-width="3" stroke-linecap="round" opacity=".55"/>
-        <path d="M238 205 C 282 186, 294 142, 260 122 C 226 148, 216 190, 238 205 Z" fill="url(#leafR)" opacity=".45"/>
-        <path d="M226 470 C 182 452, 164 408, 194 386 C 228 412, 242 454, 226 470 Z" fill="url(#leafR)" opacity=".4"/>
-        <path d="M240 700 C 284 682, 296 638, 262 618 C 228 644, 218 686, 240 700 Z" fill="url(#leafR)" opacity=".42"/>
-        <circle cx="196" cy="196" r="44" fill="url(#roseR)"/>
-        <circle cx="204" cy="188" r="28" fill="#E4A5A1" opacity=".55"/>
-        <circle cx="256" cy="336" r="50" fill="url(#roseR)" opacity=".85"/>
-        <circle cx="262" cy="330" r="30" fill="#F0C4BF" opacity=".6"/>
-        <circle cx="188" cy="548" r="38" fill="url(#goldR)" opacity=".85"/>
-        <circle cx="248" cy="742" r="42" fill="url(#roseR)" opacity=".78"/>
-        <circle cx="180" cy="120" r="20" fill="url(#goldR)" opacity=".7"/>
-        <circle cx="276" cy="612" r="18" fill="url(#goldR)" opacity=".6"/>
+
+      <g>
+        <use href="#leafB" xlink:href="#leafB" transform="translate(70,196) rotate(-28)"/>
+        <use href="#leafB" xlink:href="#leafB" transform="translate(215,215) rotate(16)"/>
+        <use href="#leafB" xlink:href="#leafB" transform="translate(392,190) rotate(-20)"/>
+        <use href="#leafB" xlink:href="#leafB" transform="translate(560,212) rotate(24)"/>
+        <use href="#leafB" xlink:href="#leafB" transform="translate(735,192) rotate(-14)"/>
+        <use href="#leafB" xlink:href="#leafB" transform="translate(910,214) rotate(20)"/>
+        <use href="#leafB" xlink:href="#leafB" transform="translate(1090,194) rotate(-24)"/>
+
+        <use href="#lilyB" xlink:href="#lilyB" transform="translate(130,214) scale(1.05)"/>
+        <use href="#lilyB" xlink:href="#lilyB" transform="translate(480,206) scale(.92) rotate(18)"/>
+        <use href="#lilyB" xlink:href="#lilyB" transform="translate(830,216) scale(1.02) rotate(-12)"/>
+        <use href="#lilyB" xlink:href="#lilyB" transform="translate(1150,208) scale(.95)"/>
+
+        <use href="#roseB" xlink:href="#roseB" transform="translate(40,228) scale(1.1)"/>
+        <use href="#roseB" xlink:href="#roseB" transform="translate(250,220) scale(1.25)"/>
+        <use href="#roseB" xlink:href="#roseB" transform="translate(380,236) scale(.9)"/>
+        <use href="#roseB" xlink:href="#roseB" transform="translate(620,222) scale(1.18)"/>
+        <use href="#roseB" xlink:href="#roseB" transform="translate(760,238) scale(.85)"/>
+        <use href="#roseB" xlink:href="#roseB" transform="translate(960,224) scale(1.2)"/>
+        <use href="#roseB" xlink:href="#roseB" transform="translate(1120,240) scale(.95)"/>
       </g>
     </svg>
   </div>
 </div>
 
-<!-- ===== KONTEN UTAMA (z 5) ===== -->
+<!-- ===== KONTEN (z 5) ===== -->
 <main id="main">
 
-  <section class="section" style="padding-top:110px">
+  <!-- STEP 3: hero di dalam jendela gerbang -->
+  <section class="hero" id="hero">
+    <div>
+      <div class="hero__eyebrow">The Wedding of</div>
+      <h1 class="hero__names">Midad <span class="amp">&amp;</span> Arum</h1>
+      <div class="hero__date">16 . 05 . 2027</div>
+      <div class="hero__scroll" aria-hidden="true"><span class="hero__scroll-icon">↓</span></div>
+    </div>
+  </section>
+
+  <section class="section">
     <div class="container container--narrow">
       <article class="quote-card glass" data-anim="zoom">
         <div class="script" style="font-size:2.2rem;color:var(--rose)">We Found Love</div>
@@ -972,12 +1332,13 @@ textarea{min-height:108px;resize:vertical}
 </div>
 <div id="ytPlayer" class="yt-stage" aria-hidden="true"></div>
 
-<!-- ===== SAMPUL (z 1000) ===== -->
+<!-- ===== STATE 0: SAMPUL (z 1000) ===== -->
 <div class="cover" id="cover">
+  <div class="arch-outer-zoom" aria-hidden="true"></div>
   <div class="cover-card">
     <div class="monogram">M · A</div>
     <div class="eyebrow">The Wedding of</div>
-    <h1 class="cover-title">Midad <span class="amp">&amp;</span> Arum</h1>
+    <h2 class="cover-title">Midad <span class="amp">&amp;</span> Arum</h2>
     <div class="cover-date">16 · 05 · 2027</div>
     <div class="guest-box">
       <span>Kepada Yth.</span>
@@ -1034,9 +1395,7 @@ textarea{min-height:108px;resize:vertical}
     storageKey  : 'ma_wedding_rsvp_v1',
     rsvpEndpoint: '',
 
-    // Kekuatan parallax. 0 = ikut diam seperti biasa, 0.2 = bergerak
-    // seperlima kecepatan scroll. Jangan lebih dari ~0.2 supaya tidak
-    // tertinggal saat momentum scroll di iOS.
+    sequenceEnd   : 3900,  // Step 4: kunci scroll dilepas (ms)
     parallaxArch  : 0.07,
     parallaxFloral: 0.14
   };
@@ -1044,6 +1403,7 @@ textarea{min-height:108px;resize:vertical}
   var $  = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var body = document.body;
 
   /* ==========================================================
      TOAST
@@ -1057,7 +1417,7 @@ textarea{min-height:108px;resize:vertical}
   }
 
   /* ==========================================================
-     NAMA TAMU DARI ?to=
+     NAMA TAMU
      ========================================================== */
   try {
     var to = new URLSearchParams(location.search).get('to');
@@ -1065,17 +1425,15 @@ textarea{min-height:108px;resize:vertical}
   } catch (e) {}
 
   /* ==========================================================
-     A. STAGGER — jeda antar-elemen dihitung sekali di awal
+     STAGGER & PECAH HURUF
      ========================================================== */
   $$('[data-stagger]').forEach(function (group) {
     var step = parseInt(group.getAttribute('data-stagger'), 10) || 100;
-    var kids = $$('[data-anim]', group);
-    kids.forEach(function (el, i) { el.style.setProperty('--d', (i * step) + 'ms'); });
+    $$('[data-anim]', group).forEach(function (el, i) {
+      el.style.setProperty('--d', (i * step) + 'ms');
+    });
   });
 
-  /* ==========================================================
-     B. PECAH NAMA PENUTUP JADI HURUF
-     ========================================================== */
   function splitLetters(el, step) {
     var nodes = Array.prototype.slice.call(el.childNodes);
     var i = 0;
@@ -1101,9 +1459,80 @@ textarea{min-height:108px;resize:vertical}
   if (!reduceMotion) splitLetters($('#closingName'), 48);
 
   /* ==========================================================
-     C. REVEAL SAAT SCROLL
-     will-change dicopot setelah animasi selesai supaya lapisan
-     GPU tidak menumpuk dan memakan memori sepanjang halaman.
+     STEP 1–4: SEKUENS PEMBUKA
+     ========================================================== */
+  var cover = $('#cover'), enterBtn = $('#enterBtn');
+  var archEntrance = $('#archEntrance');
+  var floralEntrances = $$('.floral__entrance');
+  var opened = false, unlocked = false;
+
+  document.documentElement.classList.add('locked');
+
+  function unlockScroll() {
+    if (unlocked) return;
+    unlocked = true;
+    document.documentElement.classList.remove('locked');
+    window.removeEventListener('touchmove', skipSequence);
+    window.removeEventListener('wheel', skipSequence);
+  }
+
+  // Kalau tamu sudah menggeser layar sebelum sekuens habis, hormati
+  // niatnya: percepat sisa animasi dan buka kunci. Menahan scroll
+  // selama 4 detik penuh membuat halaman terasa macet, bukan mewah.
+  function skipSequence() {
+    if (!opened || unlocked) return;
+    $$('.hero__eyebrow,.hero__names,.hero__date,.hero__scroll').forEach(function (el) {
+      el.style.transitionDelay = '0ms';
+    });
+    unlockScroll();
+  }
+
+  function settleStage(el) {
+    // filter dicopot total, bukan disetel blur(0) — lihat catatan CSS
+    el.classList.add('settled');
+  }
+
+  enterBtn.addEventListener('click', function () {
+    if (opened) return;
+    opened = true;
+
+    playMusic();
+    body.classList.add('is-opened');   // STEP 1 + 2 + 3 dipicu dari sini
+
+    // Kelopak menyala bersamaan gerbang utama mekar (STEP 2)
+    setTimeout(function () {
+      buildPetals();
+      $('#petalLayer').classList.add('is-on');
+    }, reduceMotion ? 0 : 500);
+
+    // Copot filter blur begitu animasi mekar selesai
+    if (reduceMotion) {
+      settleStage(archEntrance);
+      floralEntrances.forEach(settleStage);
+    } else {
+      archEntrance.addEventListener('animationend', function () { settleStage(archEntrance); }, { once: true });
+      floralEntrances.forEach(function (el) {
+        el.addEventListener('animationend', function () { settleStage(el); }, { once: true });
+      });
+      // Jaring pengaman kalau animationend tidak terkirim
+      setTimeout(function () {
+        settleStage(archEntrance);
+        floralEntrances.forEach(settleStage);
+      }, 3200);
+    }
+
+    // STEP 4
+    setTimeout(unlockScroll, reduceMotion ? 0 : CONFIG.sequenceEnd);
+
+    // Sampul dilepas dari alur render setelah benar-benar tak terlihat
+    setTimeout(function () { cover.style.display = 'none'; }, 2200);
+  });
+
+  window.addEventListener('touchmove', skipSequence, { passive: true });
+  window.addEventListener('wheel', skipSequence, { passive: true });
+
+  /* ==========================================================
+     REVEAL SAAT SCROLL
      ========================================================== */
   function markIn(el) {
     el.classList.add('is-in');
@@ -1119,36 +1548,30 @@ textarea{min-height:108px;resize:vertical}
         io.unobserve(en.target);
       });
     }, { threshold: .12, rootMargin: '0px 0px -60px' });
-
     $$('[data-anim]').forEach(function (el) { io.observe(el); });
 
-    // Garis vertikal timeline tumbuh dari atas ke bawah
-    var tl = $('#timeline');
     var tlIo = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (en.isIntersecting) { en.target.classList.add('is-in'); tlIo.unobserve(en.target); }
       });
     }, { threshold: .1 });
-    tlIo.observe(tl);
+    tlIo.observe($('#timeline'));
   } else {
     $$('[data-anim]').forEach(function (el) { el.classList.add('is-in'); });
     $('#timeline').classList.add('is-in');
   }
 
   /* ==========================================================
-     D. PARALLAX
-     Satu listener pasif + rAF. Membaca scrollY sekali per frame,
-     lalu menulis transform sekali — tidak ada baca-tulis
-     bergantian yang memaksa browser menghitung ulang layout.
+     PARALLAX
      ========================================================== */
-  var archWrap = $('#archWrap'), fL = $('#floralL'), fR = $('#floralR');
+  var archParallax = $('#archParallax'), fL = $('#floralL'), fR = $('#floralR');
   var ticking = false;
 
   function applyParallax() {
     var y = window.pageYOffset || document.documentElement.scrollTop;
-    archWrap.style.transform = 'translate3d(0,' + (-y * CONFIG.parallaxArch).toFixed(1) + 'px,0)';
-    var fy = (-y * CONFIG.parallaxFloral).toFixed(1);
-    fL.style.transform = 'translate3d(0,' + fy + 'px,0)';
+    archParallax.style.transform = 'translate3d(0,' + (-y * CONFIG.parallaxArch).toFixed(1) + 'px,0)';
+    var fy = -y * CONFIG.parallaxFloral;
+    fL.style.transform = 'translate3d(0,' + fy.toFixed(1) + 'px,0)';
     fR.style.transform = 'translate3d(0,' + (fy * 0.82).toFixed(1) + 'px,0)';
     ticking = false;
   }
@@ -1163,13 +1586,15 @@ textarea{min-height:108px;resize:vertical}
   }
 
   /* ==========================================================
-     E. KELOPAK GUGUR
+     KELOPAK
      ========================================================== */
+  var petalsBuilt = false;
   function buildPetals() {
-    if (reduceMotion) return;
+    if (reduceMotion || petalsBuilt) return;
+    petalsBuilt = true;
     var layer = $('#petalLayer');
     var total = window.innerWidth < 620 ? 14 : (window.innerWidth < 1024 ? 20 : 26);
-    var frag  = document.createDocumentFragment();
+    var frag = document.createDocumentFragment();
     for (var i = 0; i < total; i++) {
       var p = document.createElement('span');
       var size = Math.random() * 11 + 9;
@@ -1184,10 +1609,9 @@ textarea{min-height:108px;resize:vertical}
     }
     layer.appendChild(frag);
   }
-  buildPetals();
 
   /* ==========================================================
-     F. MUSIK LATAR
+     MUSIK
      ========================================================== */
   var player = null, playerReady = false, wantPlay = false, isPlaying = false;
   var musicBtn = $('#musicBtn');
@@ -1202,10 +1626,7 @@ textarea{min-height:108px;resize:vertical}
       player = new YT.Player('ytPlayer', {
         width: '1', height: '1',
         videoId: CONFIG.youtubeId,
-        playerVars: {
-          playsinline: 1, controls: 0, rel: 0, modestbranding: 1,
-          loop: 1, playlist: CONFIG.youtubeId
-        },
+        playerVars: { playsinline: 1, controls: 0, rel: 0, modestbranding: 1, loop: 1, playlist: CONFIG.youtubeId },
         events: {
           onReady: function () {
             playerReady = true;
@@ -1231,7 +1652,6 @@ textarea{min-height:108px;resize:vertical}
     musicBtn.textContent = on ? '♫' : '♪';
     musicBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
-
   function playMusic() {
     if (!playerReady || !player) { wantPlay = true; return; }
     try {
@@ -1240,45 +1660,18 @@ textarea{min-height:108px;resize:vertical}
       player.playVideo();
       setTimeout(function () {
         if (!isPlaying) toast('Ketuk tombol ♪ di kanan bawah untuk memutar musik.');
-      }, 1800);
-    } catch (e) {
-      toast('Ketuk tombol ♪ di kanan bawah untuk memutar musik.');
-    }
+      }, 2600);
+    } catch (e) { toast('Ketuk tombol ♪ di kanan bawah untuk memutar musik.'); }
   }
   function pauseMusic() { try { if (playerReady && player) player.pauseVideo(); } catch (e) {} }
   musicBtn.addEventListener('click', function () { isPlaying ? pauseMusic() : playMusic(); });
 
   /* ==========================================================
-     G. SAMPUL — urutan keluarnya bertahap
-     ========================================================== */
-  var cover = $('#cover'), enterBtn = $('#enterBtn'), opened = false;
-  document.documentElement.classList.add('locked');
-
-  enterBtn.addEventListener('click', function () {
-    if (opened) return;
-    opened = true;
-    playMusic();
-
-    // 1. isi kartu pamit satu per satu
-    cover.classList.add('is-leaving');
-
-    // 2. panel naik setelah isinya hilang
-    setTimeout(function () {
-      cover.classList.add('is-open');
-      document.documentElement.classList.remove('locked');
-    }, reduceMotion ? 0 : 520);
-
-    // 3. hentikan sampul dari DOM agar tidak menahan lapisan GPU
-    setTimeout(function () { cover.style.display = 'none'; }, 2200);
-  });
-
-  /* ==========================================================
-     H. HITUNG MUNDUR
+     HITUNG MUNDUR
      ========================================================== */
   var target = new Date(CONFIG.eventStart).getTime();
   var elDays = $('#cdDays'), elHours = $('#cdHours'), elMin = $('#cdMinutes'), elSec = $('#cdSeconds');
   var cdTimer, lastSec = -1;
-
   function pad(n, len) { return String(n).padStart(len, '0'); }
 
   function tickCountdown() {
@@ -1308,7 +1701,7 @@ textarea{min-height:108px;resize:vertical}
   cdTimer = setInterval(tickCountdown, 1000);
 
   /* ==========================================================
-     I. SIMPAN KE KALENDER
+     KALENDER
      ========================================================== */
   function icsStamp(iso) {
     var d = new Date(iso);
@@ -1335,11 +1728,8 @@ textarea{min-height:108px;resize:vertical}
       var blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
-      a.href = url;
-      a.download = 'Midad-Arum-16-Mei-2027.ics';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      a.href = url; a.download = 'Midad-Arum-16-Mei-2027.ics';
+      document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
       toast('Berkas kalender diunduh. Buka untuk menambahkannya.');
     } catch (e) {
@@ -1357,19 +1747,18 @@ textarea{min-height:108px;resize:vertical}
   });
 
   /* ==========================================================
-     J. PETA & SIARAN LANGSUNG
+     PETA & STREAMING
      ========================================================== */
   $$('.js-map').forEach(function (btn) {
     btn.addEventListener('click', function () { window.open(CONFIG.mapsUrl, '_blank', 'noopener'); });
   });
-
   $('#streamBtn').addEventListener('click', function () {
     if (!CONFIG.streamUrl) { toast('Tautan siaran langsung akan dibagikan mendekati hari H.'); return; }
     window.open(CONFIG.streamUrl, '_blank', 'noopener');
   });
 
   /* ==========================================================
-     K. MODAL HADIAH
+     MODAL HADIAH
      ========================================================== */
   var giftModal = $('#giftModal'), giftBtn = $('#giftBtn');
   $('#bankNumberText').textContent = CONFIG.bankNumber.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
@@ -1410,10 +1799,9 @@ textarea{min-height:108px;resize:vertical}
   });
 
   /* ==========================================================
-     L. LIGHTBOX
+     LIGHTBOX
      ========================================================== */
   var lightbox = $('#lightbox'), lightboxImg = $('#lightboxImg'), lastZoomBtn = null;
-
   $$('.js-zoom').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var img = $('img', btn);
@@ -1425,7 +1813,6 @@ textarea{min-height:108px;resize:vertical}
       $('#closeLightbox').focus();
     });
   });
-
   function closeLightbox() {
     lightbox.classList.remove('open');
     lightbox.setAttribute('aria-hidden', 'true');
@@ -1433,7 +1820,6 @@ textarea{min-height:108px;resize:vertical}
   }
   $('#closeLightbox').addEventListener('click', closeLightbox);
   lightbox.addEventListener('click', function (e) { if (e.target !== lightboxImg) closeLightbox(); });
-
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     if (lightbox.classList.contains('open')) closeLightbox();
@@ -1441,11 +1827,7 @@ textarea{min-height:108px;resize:vertical}
   });
 
   /* ==========================================================
-     M. RSVP + BUKU TAMU (localStorage)
-     CATATAN: localStorage hanya hidup di perangkat ini. Tamu lain
-     tidak melihat ucapan yang sama, dan angka Hadir/Berhalangan
-     bukan total tamu sesungguhnya. Isi CONFIG.rsvpEndpoint kalau
-     butuh data lintas perangkat.
+     RSVP (localStorage — per perangkat, bukan total tamu asli)
      ========================================================== */
   var wishesList = $('#wishesList'), rsvpForm = $('#rsvpForm');
   var elHadir = $('#countHadir'), elAbsen = $('#countAbsen');
@@ -1478,12 +1860,12 @@ textarea{min-height:108px;resize:vertical}
         head.textContent = item.name;
         var tag = document.createElement('em');
         tag.textContent = item.attendance;
-        var body = document.createElement('p');
-        body.textContent = item.message;
+        var bodyP = document.createElement('p');
+        bodyP.textContent = item.message;
         head.appendChild(document.createTextNode(' '));
         head.appendChild(tag);
         card.appendChild(head);
-        card.appendChild(body);
+        card.appendChild(bodyP);
         wishesList.appendChild(card);
       });
     }
@@ -1525,7 +1907,7 @@ textarea{min-height:108px;resize:vertical}
   });
 
   /* ==========================================================
-     N. BAGIKAN UNDANGAN
+     BAGIKAN
      ========================================================== */
   $('#shareBtn').addEventListener('click', function () {
     var text = 'Undangan pernikahan Midad & Arum — Minggu, 16 Mei 2027';
